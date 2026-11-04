@@ -2,13 +2,13 @@
 
 [![DevSecOps pipeline](../../actions/workflows/pipeline.yml/badge.svg)](../../actions/workflows/pipeline.yml)
 
-The personal portfolio of [Your Name], an early-career cybersecurity and GRC professional. It is a single page built with plain HTML, CSS and JavaScript, with an interactive terminal and three security mini-games.
+The personal portfolio of Aniketh Indiresh Ail, a Cybersecurity Risk & GRC Analyst in Dublin, Ireland. It is a single page built with plain HTML, CSS and JavaScript, with an interactive terminal and three security mini-games.
 
 ## Project layout
 
 | Path | Purpose |
 | --- | --- |
-| `index.html`, `style.css`, `script.js`, `assets/` | The website, and the only files that get published |
+| `index.html`, `style.css`, `script.js`, `assets/` | The website, and the only files that get published. Fonts are self-hosted in `assets/fonts/` under the SIL Open Font License. |
 | `.github/workflows/pipeline.yml` | Security checks and deployment |
 | `.github/dependabot.yml` | Weekly updates for the GitHub Actions in the pipeline |
 | `eslint.config.mjs`, `.htmlhintrc`, `scripts/` | Lint rules |

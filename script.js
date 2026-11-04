@@ -4,11 +4,12 @@
      1. Theme (runs straight away to avoid a flash of the wrong theme)
      2. Helpers
      3. Navigation and scroll effects
-     4. Terminal
-     5. Tabs
-     6. Game 1: Find the Vulnerability
-     7. Game 2: Phishing Spotter
-     8. Game 3: Password Puzzle
+     4. Hero: name effect and risk matrix
+     5. Terminal
+     6. Tabs
+     7. Game 1: Find the Vulnerability
+     8. Game 2: Phishing Spotter
+     9. Game 3: Password Puzzle
 
    Security rule for this file: text only ever reaches the page through
    textContent or the h() helper below, which uses it too. Nothing in here
@@ -26,7 +27,7 @@
   /* 1. Theme
      ======================================================================== */
   const THEME_KEY = 'portfolio-theme';
-  const THEME_COLORS = { dark: '#060913', light: '#edf1fa' };
+  const THEME_COLORS = { dark: '#070a08', light: '#f1efe4' };
 
   // localStorage can throw in private modes, so failures fall back to dark.
   function loadTheme() {
@@ -206,7 +207,64 @@
     update();
   }
 
-  /* 4. Terminal
+  /* 4. Hero: name effect and risk matrix
+     ======================================================================== */
+
+  // Decrypts each line of the name, one character at a time. Math.random is fine
+  // here because this is only decoration. The name itself never changes, and
+  // screen readers get a fixed copy of it in the heading.
+  function initNameEffect() {
+    if (prefersReducedMotion()) return;
+
+    const GLYPHS = 'ABCDEFGHKLMNPRSTUVXYZ0123456789#/%$';
+    const FRAME_MS = 40;
+    const FRAMES_PER_CHARACTER = 2;
+
+    document.querySelectorAll('[data-scramble]').forEach((line, lineIndex) => {
+      const finalText = line.textContent;
+      const characters = [...finalText];
+      let frame = -lineIndex * 6;
+
+      function draw() {
+        frame += 1;
+        const revealed = Math.max(0, Math.floor(frame / FRAMES_PER_CHARACTER));
+        if (revealed >= characters.length) {
+          line.textContent = finalText;
+          return false;
+        }
+        line.textContent = characters
+          .map((character, index) => (index < revealed
+            ? character
+            : GLYPHS[Math.floor(Math.random() * GLYPHS.length)]))
+          .join('');
+        return true;
+      }
+
+      draw();
+      const timer = setInterval(() => {
+        if (!draw()) clearInterval(timer);
+      }, FRAME_MS);
+    });
+  }
+
+  // Builds the 5 x 5 likelihood and impact heat map behind the terminal, shaded
+  // by score (likelihood multiplied by impact), as in a real risk matrix.
+  function initRiskMatrix() {
+    const matrix = byId('risk-matrix');
+    const SIZE = 5;
+
+    for (let likelihood = SIZE; likelihood >= 1; likelihood -= 1) {
+      for (let impact = 1; impact <= SIZE; impact += 1) {
+        const score = likelihood * impact;
+        let level = '';
+        if (score >= 15) level = 'is-high';
+        else if (score >= 6) level = 'is-mid';
+        matrix.append(h('span', { className: `matrix-cell ${level}`.trim() }));
+      }
+    }
+  }
+
+  /* 5. Terminal
      ======================================================================== */
   function initTerminal() {
     const output = byId('terminal-output');
@@ -214,7 +272,7 @@
     const input = byId('terminal-input');
     const terminal = form.closest('.terminal');
 
-    const PROMPT = 'guest@portfolio:~$';
+    const PROMPT = 'guest@aniketh:~$';
     const MAX_LINES = 200;
     const MAX_HISTORY = 50;
     const TYPE_SPEED_MS = 14;
@@ -222,7 +280,7 @@
     const BOOT_LINES = [
       { text: 'Starting session...', className: 'term-muted' },
       { text: 'Cookies: 0   Trackers: 0   Third-party scripts: 0', className: 'term-muted' },
-      { text: 'Welcome. Type "help" to see what this terminal can do.', className: 'term-accent' },
+      { text: 'Hi, I\'m Aniketh. Type "help" to look around.', className: 'term-accent' },
     ];
 
     const history = [];
@@ -265,11 +323,22 @@
     }
 
     function printAbout() {
-      print(pageText(byId('about-summary')));
+      document.querySelectorAll('.about-text p').forEach((paragraph) => {
+        print(pageText(paragraph));
+        print('');
+      });
       byId('about-facts').querySelectorAll('div').forEach((fact) => {
         printRow(pageText(fact.querySelector('dt')), pageText(fact.querySelector('dd')));
       });
       printJump('about');
+    }
+
+    function printCurrently() {
+      document.querySelectorAll('[data-now-item]').forEach((item) => {
+        print(pageText(item.querySelector('h3')), 'term-heading');
+        print(pageText(item.querySelector('p')));
+      });
+      printJump('currently');
     }
 
     function printSkills() {
@@ -284,29 +353,52 @@
       printJump('skills');
     }
 
+    // Prints a title, its details and any bullet points from a block on the page.
+    function printEntry(block, dateSelector) {
+      print(pageText(block.querySelector('h3')), 'term-heading');
+      const organisation = block.querySelector('.timeline-org');
+      if (organisation) print(pageText(organisation));
+      print(pageText(block.querySelector(dateSelector)), 'term-muted');
+      block.querySelectorAll('li').forEach((point) => print(`- ${pageText(point)}`, 'term-bullet'));
+    }
+
     function printExperience() {
-      document.querySelectorAll('.timeline-item').forEach((item) => {
-        print(pageText(item.querySelector('h3')), 'term-heading');
-        print(`  ${pageText(item.querySelector('.timeline-org'))}`);
-        print(`  ${pageText(item.querySelector('.timeline-date'))}`, 'term-muted');
+      byId('experience-list').querySelectorAll('.timeline-item').forEach((item) => printEntry(item, '.timeline-date'));
+      print('Type "education" for my degrees and diploma.', 'term-muted');
+      printJump('experience');
+    }
+
+    function printEducation() {
+      byId('education-list').querySelectorAll('.timeline-item').forEach((item) => {
+        printEntry(item, '.timeline-date');
+        const coursework = item.querySelector('.timeline-body > p:last-child:not(.timeline-org)');
+        if (coursework) print(pageText(coursework));
       });
       printJump('experience');
     }
 
+    function printProjects() {
+      document.querySelectorAll('[data-project]').forEach((project) => printEntry(project, '.project-dates'));
+      printJump('projects');
+    }
+
+    function printRoute() {
+      print('traceroute to aniketh, 3 hops', 'term-muted');
+      byId('route-hops').querySelectorAll('.route-hop').forEach((hop) => {
+        const place = `${pageText(hop.querySelector('.hop-number'))}  ${pageText(hop.querySelector('.hop-place'))}`;
+        printRow(place, `${pageText(hop.querySelector('.hop-dates'))}. ${pageText(hop.querySelector('.hop-detail'))}`);
+      });
+    }
+
     function printContact() {
+      print(pageText(document.querySelector('#contact .section-intro')));
       document.querySelectorAll('[data-contact-link]').forEach((source) => {
         // Only copies links written into index.html, never anything typed here.
         const link = h('a', {
           className: 'term-link',
           text: source.getAttribute('href'),
-          attrs: { href: source.getAttribute('href') },
+          attrs: { href: source.getAttribute('href'), target: '_blank', rel: 'noopener noreferrer' },
         });
-        if (source.hasAttribute('download')) {
-          link.setAttribute('download', source.getAttribute('download'));
-        } else {
-          link.setAttribute('target', '_blank');
-          link.setAttribute('rel', 'noopener noreferrer');
-        }
         printRow(source.dataset.label, link);
       });
     }
@@ -314,11 +406,15 @@
     /* A Map rather than a plain object, so that typing "constructor" or
        "__proto__" can't match something inherited from Object. */
     const COMMANDS = new Map([
-      ['help', { description: 'list the available commands', run: printHelp }],
+      ['help', { description: 'list what you can type here', run: printHelp }],
       ['about', { description: 'who I am', run: printAbout }],
-      ['skills', { description: 'skills and certifications', run: printSkills }],
-      ['experience', { description: 'roles and projects', run: printExperience }],
-      ['contact', { description: 'LinkedIn, GitHub and CV', run: printContact }],
+      ['currently', { description: 'what I\'m up to right now', run: printCurrently }],
+      ['skills', { description: 'my skills and certifications', run: printSkills }],
+      ['experience', { description: 'where I\'ve worked', run: printExperience }],
+      ['education', { description: 'what I\'ve studied', run: printEducation }],
+      ['projects', { description: 'my risk analysis projects', run: printProjects }],
+      ['contact', { description: 'LinkedIn and GitHub', run: printContact }],
+      ['traceroute', { description: 'how I got to Dublin', run: printRoute }],
       ['challenge', { description: 'jump to the security games', run: goToChallenge }],
       ['theme', { description: 'switch between dark and light', run: () => print(`Theme set to ${toggleTheme()}.`) }],
       ['clear', { description: 'clear the screen', run: () => output.replaceChildren() }],
@@ -327,7 +423,9 @@
     const EASTER_EGGS = new Map([
       ['sudo', 'guest is not in the sudoers file. This incident will be raised at the next audit.'],
       ['whoami', 'guest: read-only access. Least privilege, as it should be.'],
-      ['ls', 'about  skills  experience  challenge  contact'],
+      ['ls', 'about  currently  skills  experience  education  projects  challenge  contact'],
+      ['rm', 'Access denied. That would need an approved request and an audit trail.'],
+      ['fair', 'Estimated loss from typing that command: EUR 0. Confidence: high.'],
     ]);
 
     function printHelp() {
@@ -462,7 +560,7 @@
     }
   }
 
-  /* 5. Tabs
+  /* 6. Tabs
      ======================================================================== */
   function initTabs() {
     const tabs = [...document.querySelectorAll('[role="tab"]')];
@@ -497,7 +595,7 @@
     });
   }
 
-  /* 6. Game 1: Find the Vulnerability
+  /* 7. Game 1: Find the Vulnerability
      ======================================================================== */
   const FINDINGS = {
     http: {
@@ -632,7 +730,7 @@
     });
   }
 
-  /* 7. Game 2: Phishing Spotter
+  /* 8. Game 2: Phishing Spotter
      All names and domains are fictional, and .example is reserved so it can
      never belong to a real organisation. Links are shown as text only.
      ======================================================================== */
@@ -883,7 +981,7 @@
     startRound();
   }
 
-  /* 8. Game 3: Password Puzzle
+  /* 9. Game 3: Password Puzzle
      Visitors crack someone else's bad password instead of testing their own,
      so this game never encourages typing a real password into a website.
      ======================================================================== */
@@ -1033,6 +1131,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
     initMobileMenu();
+    initRiskMatrix();
+    initNameEffect();
     initScrollReveal();
     initActiveNavLink();
     initScrollProgress();

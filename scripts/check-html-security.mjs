@@ -8,6 +8,8 @@ const REQUIRED_DIRECTIVES = {
   'default-src': "'none'",
   'script-src': "'self'",
   'style-src': "'self'",
+  'img-src': "'self'",
+  'font-src': "'self'",
   'base-uri': "'none'",
   'form-action': "'none'",
   'require-trusted-types-for': "'script'",

@@ -1,13 +1,13 @@
 # Security Policy
 
-This is the personal portfolio site of [Your Name]. It is a static site with no backend, accounts, cookies or stored visitor data, but security reports are still welcome.
+This is the personal portfolio site of Aniketh Indiresh Ail. It is a static site with no backend, accounts, cookies or stored visitor data, but security reports are still welcome.
 
 ## Reporting a vulnerability
 
 Please report privately, not in a public issue:
 
 - **Preferred:** [open a private security advisory](../../security/advisories/new) on this repository.
-- **Alternative:** email [your-security-contact@example.com].
+- **Alternative:** message me on [LinkedIn](https://linkedin.com/in/anikethail) and I'll arrange a private way to share the details.
 
 Please include:
 
@@ -42,7 +42,7 @@ Only the current version on the `main` branch, which is what the live site runs,
 
 **In the browser**
 
-- A strict Content Security Policy allows scripts, styles and images from this site only, and blocks inline scripts.
+- A strict Content Security Policy allows scripts, styles, images and fonts from this site only, and blocks inline scripts.
 - Trusted Types makes `innerHTML` and similar string-to-HTML assignments throw an error in browsers that support it.
 - Visitor input is written to the page with `textContent` only, and the password puzzle also limits its input to letters and digits.
 - There is no third-party code, and only the theme preference is stored, in the visitor's own browser.
