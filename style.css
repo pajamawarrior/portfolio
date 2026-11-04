@@ -1,0 +1,1006 @@
+/* ==========================================================================
+   Portfolio styles
+   Contents:
+     1. Design tokens (dark and light themes)
+     2. Base elements and accessibility helpers
+     3. Background, header and navigation
+     4. Shared components (glass panels, buttons, tags)
+     5. Hero and terminal
+     6. Content sections
+     7. Security challenge: tabs and shared game parts
+     8. Game 1: Find the Vulnerability
+     9. Game 2: Phishing Spotter
+    10. Game 3: Password Puzzle
+    11. Footer
+    12. Scroll animations and motion preferences
+   ========================================================================== */
+
+/* 1. Design tokens
+   ========================================================================== */
+:root {
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "SF Pro Display", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, "SF Pro Display", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Cascadia Code", "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --radius: 18px;
+  --radius-small: 10px;
+  --header-height: 4.25rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Dark theme is the default. */
+  color-scheme: dark;
+  --bg: #060913;
+  --surface: rgba(21, 30, 54, 0.52);
+  --surface-strong: rgba(13, 19, 36, 0.86);
+  --surface-subtle: rgba(140, 170, 255, 0.07);
+  --border: rgba(140, 170, 255, 0.18);
+  --border-strong: rgba(34, 230, 255, 0.55);
+  --text: #e9effc;
+  --muted: #a3afc9;
+  --accent: #22e6ff;
+  --accent-2: #b794ff;
+  --on-accent: #03141a;
+  --ok: #3dffa8;
+  --on-ok: #03190f;
+  --bad: #ff7391;
+  --warn: #ffcb66;
+  --on-warn: #211600;
+  --tile-absent: #2a3350;
+  --on-tile-absent: #c9d2e8;
+  --glow: 0 0 28px rgba(34, 230, 255, 0.22);
+  --glow-strong: 0 0 38px rgba(34, 230, 255, 0.38);
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+  --bg-grid: rgba(120, 160, 255, 0.07);
+  --bg-glow-1: rgba(34, 230, 255, 0.15);
+  --bg-glow-2: rgba(150, 90, 255, 0.17);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #edf1fa;
+  --surface: rgba(255, 255, 255, 0.62);
+  --surface-strong: rgba(255, 255, 255, 0.9);
+  --surface-subtle: rgba(30, 60, 140, 0.06);
+  --border: rgba(30, 50, 110, 0.17);
+  --border-strong: rgba(0, 106, 128, 0.6);
+  --text: #0d1630;
+  --muted: #47536f;
+  --accent: #006478;
+  --accent-2: #5f2fc4;
+  --on-accent: #ffffff;
+  --ok: #05693f;
+  --on-ok: #ffffff;
+  --bad: #b01b41;
+  --warn: #7f5200;
+  --on-warn: #ffffff;
+  --tile-absent: #d5dbea;
+  --on-tile-absent: #2a3350;
+  --glow: 0 0 26px rgba(0, 130, 160, 0.14);
+  --glow-strong: 0 0 34px rgba(0, 130, 160, 0.26);
+  --shadow: 0 16px 44px rgba(40, 60, 120, 0.13);
+  --bg-grid: rgba(40, 70, 150, 0.07);
+  --bg-glow-1: rgba(0, 190, 220, 0.16);
+  --bg-glow-2: rgba(130, 80, 240, 0.13);
+}
+
+/* 2. Base elements and accessibility helpers
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--bg);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  overflow-wrap: break-word;
+}
+
+h1, h2, h3, p, ul, ol, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+button, input { font: inherit; color: inherit; }
+a { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 0.9em; }
+
+/* Coding fonts can merge characters such as <!-- into arrows. Anything shown as
+   literal text (typed commands, fake URLs, the HTML comment clue) must stay exact. */
+code, .terminal, .terminal-input, .mock-url, .mock-comment, .email-extra, .puzzle-input {
+  font-variant-ligatures: none;
+}
+
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing: -0.02em; }
+h2 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 650; margin-bottom: 1.75rem; }
+h3 { font-size: 1.2rem; font-weight: 620; }
+
+[hidden] { display: none !important; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-small);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+.container {
+  width: min(100% - 2.5rem, 1160px);
+  margin-inline: auto;
+}
+
+/* 3. Background, header and navigation
+   ========================================================================== */
+
+/* Faint grid that fades out from the top of the screen. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 15%, #000 20%, transparent 80%);
+  mask-image: radial-gradient(ellipse 90% 75% at 50% 15%, #000 20%, transparent 80%);
+}
+
+/* Two soft neon glows give the glass panels something to blur. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 85% 12%, var(--bg-glow-1), transparent 38%),
+    radial-gradient(circle at 8% 70%, var(--bg-glow-2), transparent 40%);
+}
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--surface-strong);
+  border-bottom: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: min(100% - 2.5rem, 1160px);
+  min-height: var(--header-height);
+  margin-inline: auto;
+}
+
+.brand {
+  margin-right: auto;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.brand-mark { color: var(--accent); }
+
+.nav-links { display: flex; gap: 0.25rem; }
+.nav-links a {
+  display: block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.2s, background-color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a[aria-current="true"] { color: var(--accent); background: var(--surface-subtle); }
+
+.nav-actions { display: flex; gap: 0.5rem; }
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.icon-button:hover { border-color: var(--border-strong); box-shadow: var(--glow); }
+.icon-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Show the icon for the theme you would switch to. */
+.icon-moon { display: none; }
+:root[data-theme="light"] .icon-sun { display: none; }
+:root[data-theme="light"] .icon-moon { display: block; }
+
+.nav-toggle { display: none; }
+
+@media (max-width: 760px) {
+  .nav-toggle { display: grid; }
+  .nav { position: relative; flex-wrap: wrap; }
+  .nav-links {
+    order: 3;
+    flex-basis: 100%;
+    flex-direction: column;
+    padding-bottom: 0.75rem;
+  }
+  .nav-links a { padding: 0.7rem 0.8rem; }
+  /* The menu only collapses when JavaScript is there to open it again. */
+  .js .nav-links:not(.is-open) { display: none; }
+}
+
+/* 4. Shared components
+   ========================================================================== */
+.glass {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  backdrop-filter: blur(16px) saturate(135%);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: var(--surface-strong); }
+}
+
+.panel { padding: clamp(1.25rem, 3vw, 2rem); }
+
+.card-hover { transition: border-color 0.25s, box-shadow 0.25s; }
+.card-hover:hover { border-color: var(--border-strong); box-shadow: var(--shadow), var(--glow); }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.9rem;
+  padding: 0.55rem 1.3rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background-color 0.2s;
+}
+.button:hover { box-shadow: var(--glow); }
+.button-primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.button-primary:hover { box-shadow: var(--glow-strong); }
+.button-small { min-height: 2.75rem; padding: 0.4rem 1rem; font-size: 0.95rem; }
+.button:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+.tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.tag-list li {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+/* 5. Hero and terminal
+   ========================================================================== */
+.hero {
+  display: flex;
+  align-items: center;
+  min-height: calc(100vh - var(--header-height));
+  min-height: calc(100svh - var(--header-height));
+  padding-block: clamp(2.5rem, 7vh, 5rem);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1.25rem;
+  padding: 0.3rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.status-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 10px var(--ok);
+}
+
+h1 {
+  font-size: clamp(2.7rem, 6.2vw, 4.75rem);
+  font-weight: 720;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  /* Neon gradient text, with a solid colour where clipping isn't supported. */
+  color: var(--accent);
+  background: linear-gradient(100deg, var(--accent) 10%, var(--accent-2) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-role { margin-top: 1rem; font-size: clamp(1.15rem, 2.2vw, 1.4rem); font-weight: 560; }
+.hero-summary { margin-top: 0.6rem; color: var(--muted); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+
+/* The terminal keeps its dark look in both themes, so it has its own colours. */
+.terminal {
+  --term-text: #d8e3f7;
+  --term-muted: #93a1bd;
+  --term-accent: #22e6ff;
+  --term-green: #3dffa8;
+  --term-red: #ff8aa3;
+  overflow: hidden;
+  border: 1px solid rgba(34, 230, 255, 0.35);
+  border-radius: var(--radius);
+  background: rgba(5, 9, 19, 0.92);
+  box-shadow: var(--shadow), var(--glow);
+  color: var(--term-text);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid rgba(140, 170, 255, 0.16);
+  background: rgba(140, 170, 255, 0.06);
+}
+.terminal-dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: #ff6b81; }
+.terminal-dot:nth-child(2) { background: #ffcb66; }
+.terminal-dot:nth-child(3) { background: #3dffa8; }
+.terminal-title { margin-left: 0.6rem; color: var(--term-muted); font-size: 0.78rem; }
+
+.terminal-output {
+  height: clamp(16rem, 44vh, 24rem);
+  padding: 1rem 1rem 0.5rem;
+  overflow-y: auto;
+  scrollbar-color: rgba(140, 170, 255, 0.3) transparent;
+  scrollbar-width: thin;
+}
+.terminal-output:focus-visible { outline-offset: -3px; }
+
+.term-line { min-height: 1.55em; white-space: pre-wrap; overflow-wrap: anywhere; }
+.term-row {
+  display: grid;
+  grid-template-columns: 13ch minmax(0, 1fr);
+  column-gap: 1ch;
+  overflow-wrap: anywhere;
+}
+.term-row > :first-child { color: var(--term-accent); }
+.term-echo { margin-top: 0.6rem; color: var(--term-green); }
+.term-muted { color: var(--term-muted); }
+.term-accent { color: var(--term-accent); }
+.term-error { color: var(--term-red); }
+.term-heading { margin-top: 0.4rem; color: var(--term-accent); font-weight: 600; }
+.term-link { color: var(--term-accent); text-underline-offset: 2px; }
+.term-link:focus-visible { outline-color: var(--term-accent); }
+
+.terminal-prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem 0.85rem;
+}
+.terminal-ps1 { flex: none; color: var(--term-green); font-weight: 600; }
+.terminal-input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  caret-color: var(--term-accent);
+  color: var(--term-text);
+  font-family: var(--font-mono);
+  font-size: 1rem; /* 16px stops iOS zooming in when the field is focused. */
+  outline: none;
+}
+/* The input has no outline of its own, so the whole prompt shows focus. */
+.terminal-prompt:focus-within { box-shadow: inset 0 0 0 1px var(--term-accent); }
+
+.terminal-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.85rem; }
+.chip {
+  min-height: 2.75rem;
+  padding: 0.3rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.chip:hover { border-color: var(--border-strong); box-shadow: var(--glow); }
+
+@media (max-width: 940px) {
+  .hero { min-height: 0; }
+  .hero-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 420px) {
+  .ps1-host { display: none; }
+}
+
+/* 6. Content sections
+   ========================================================================== */
+.section { padding-block: clamp(3.5rem, 9vh, 6.5rem); scroll-margin-top: var(--header-height); }
+
+.eyebrow {
+  margin-bottom: 0.4rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+.section-intro { max-width: 46rem; margin: -0.75rem 0 2rem; color: var(--muted); }
+.subheading { margin: 2.75rem 0 1rem; font-size: 1.45rem; }
+.lead { font-size: 1.2rem; line-height: 1.55; }
+#about-detail { margin-top: 1rem; color: var(--muted); }
+
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.facts { display: grid; gap: 1rem; align-content: start; }
+.facts dt {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.card-grid, .cert-grid, .contact-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16.5rem), 1fr));
+}
+
+.cert-card { padding: 1.25rem 1.4rem; border-left: 2px solid var(--accent-2); }
+.cert-name { font-weight: 620; }
+.cert-meta { margin-top: 0.2rem; color: var(--muted); font-size: 0.92rem; }
+
+.timeline { position: relative; display: grid; gap: 1.25rem; padding-left: 1.75rem; }
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 0.3rem;
+  width: 2px;
+  background: linear-gradient(var(--accent), var(--accent-2), transparent);
+}
+.timeline-item { position: relative; }
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  top: 1.9rem;
+  left: calc(-1.75rem - 1px);
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+.timeline-date { color: var(--accent); font-family: var(--font-mono); font-size: 0.82rem; }
+.timeline-item h3 { margin-top: 0.3rem; }
+.timeline-org { color: var(--muted); }
+.timeline-item ul { margin-top: 0.75rem; padding-left: 1.15rem; list-style: disc; }
+.timeline-item li + li { margin-top: 0.3rem; }
+
+.contact-card {
+  display: block;
+  padding: 1.5rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.contact-title { display: block; font-size: 1.2rem; font-weight: 620; }
+.contact-title::after { content: " \2192"; color: var(--accent); }
+.contact-detail {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .about-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* 7. Security challenge: tabs and shared game parts
+   ========================================================================== */
+.game-shell { padding: clamp(0.75rem, 2vw, 1.25rem); }
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 14px;
+  background: var(--surface-subtle);
+}
+
+.tab {
+  flex: 1 1 auto;
+  min-height: 2.9rem;
+  padding: 0.45rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] {
+  border-color: var(--border-strong);
+  background: var(--surface-strong);
+  color: var(--accent);
+  box-shadow: var(--glow);
+}
+.tab.is-complete::after { content: " \2713"; color: var(--ok); }
+
+.tab-panel { padding: clamp(1rem, 2.5vw, 1.75rem) clamp(0.25rem, 1.5vw, 0.75rem) 0.75rem; }
+.tab-panel:focus-visible { outline-offset: -2px; }
+
+.game-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  margin-bottom: 1.25rem;
+}
+.game-header > p:first-child { flex: 1 1 26rem; }
+
+.game-score { color: var(--accent); font-family: var(--font-mono); font-size: 0.9rem; }
+.game-note { margin-top: 0.6rem; color: var(--muted); font-size: 0.85rem; }
+.game-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+.game-message { color: var(--muted); font-size: 0.95rem; }
+.game-message.is-good { color: var(--ok); }
+.game-message.is-bad { color: var(--bad); }
+
+/* 8. Game 1: Find the Vulnerability
+   ========================================================================== */
+.vuln-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* The fake page looks like a dated corporate site in both themes. */
+.mock-browser {
+  --spot-ring: #0092ad;
+  --spot-found: #c5183f;
+  --spot-clear: #05693f;
+  overflow: hidden;
+  border: 1px solid #aeb6c8;
+  border-radius: 12px;
+  background: #f4f5f8;
+  color: #1b2130;
+  font-size: 0.92rem;
+}
+
+.mock-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  background: #dfe3ec;
+  border-bottom: 1px solid #c3c9d6;
+}
+.mock-dots { display: flex; flex: none; gap: 0.3rem; }
+.mock-dots span { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #9aa2b4; }
+.mock-url {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.mock-page {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+
+/* Hot spots and decoys look the same until they have been clicked. */
+.spot {
+  position: relative;
+  max-width: 100%;
+  min-height: 1.9rem;
+  padding: 0.15rem 0.3rem;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: crosshair;
+  outline: 1px dashed transparent;
+  outline-offset: 1px;
+  transition: outline-color 0.15s, background-color 0.15s;
+}
+.spot:hover { outline-color: var(--spot-ring); background: rgba(0, 146, 173, 0.09); }
+.spot:focus-visible { outline: 2px solid var(--spot-ring); }
+.spot[aria-disabled="true"] { cursor: default; }
+
+.spot.is-found {
+  outline: 2px solid var(--spot-found);
+  background: rgba(197, 24, 63, 0.1);
+}
+.spot.is-found::after { content: " \2691"; color: var(--spot-found); }
+.spot.is-missed {
+  outline: 2px dashed var(--spot-found);
+  background: rgba(197, 24, 63, 0.06);
+}
+.spot.is-missed::after { content: " (missed)"; color: var(--spot-found); font-size: 0.85em; }
+.spot.is-cleared { outline: 1px dotted var(--spot-clear); }
+.spot.is-cleared::after { content: " \2713"; color: var(--spot-clear); }
+
+.mock-logo { color: #24427d; font-size: 1.15rem; font-weight: 700; }
+.mock-title { margin-bottom: 0.2rem; padding-inline: 0.3rem; font-weight: 600; }
+.mock-error {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  background: #fbe4e6;
+  color: #8a1426;
+}
+.mock-label { margin-top: 0.3rem; padding-inline: 0.3rem; color: #4d5568; font-size: 0.8rem; }
+.mock-field {
+  width: 100%;
+  min-height: 2.2rem;
+  padding-inline: 0.6rem;
+  border: 1px solid #9aa2b4;
+  background: #fff;
+}
+.mock-submit {
+  margin-top: 0.6rem;
+  padding-inline: 1.3rem;
+  border-radius: 6px;
+  background: #24427d;
+  color: #fff;
+  font-weight: 600;
+}
+.spot.mock-submit:hover { background: #24427d; }
+.mock-note { color: #4d5568; font-size: 0.82rem; }
+.mock-link { color: #1b4cb0; text-decoration: underline; font-size: 0.85rem; }
+.mock-small { margin-top: 0.3rem; font-size: 0.78rem; }
+.mock-comment { color: #52606f; font-family: var(--font-mono); font-size: 0.74rem; }
+
+.vuln-report h3 { margin-bottom: 0.5rem; }
+.report-list { display: grid; gap: 0.75rem; margin-top: 0.85rem; }
+.report-item {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--bad);
+  border-radius: var(--radius-small);
+  background: var(--surface-subtle);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+.report-title { font-weight: 620; }
+.report-severity {
+  display: inline-block;
+  margin-right: 0.4rem;
+  padding: 0 0.45rem;
+  border: 1px solid var(--bad);
+  border-radius: 999px;
+  color: var(--bad);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  vertical-align: 0.1em;
+}
+.report-fix { margin-top: 0.35rem; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .vuln-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* 9. Game 2: Phishing Spotter
+   ========================================================================== */
+.email {
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+.email-subject:focus { outline: none; }
+.email-meta {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.6rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.email-meta > div { display: flex; gap: 0.6rem; }
+.email-meta dt { flex: none; width: 4.5rem; color: var(--muted); }
+.email-meta dd { min-width: 0; overflow-wrap: anywhere; }
+.email-body { margin-top: 0.85rem; }
+.email-body p + p { margin-top: 0.65rem; }
+.email-extra {
+  margin-top: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-small);
+  background: var(--surface-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.phish-feedback {
+  margin-top: 1rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ok);
+  border-radius: var(--radius-small);
+  background: var(--surface-subtle);
+  scroll-margin-bottom: 6rem;
+}
+.phish-feedback.is-wrong { border-left-color: var(--bad); }
+.phish-verdict { font-weight: 650; }
+.phish-feedback ul { margin-top: 0.4rem; padding-left: 1.15rem; list-style: disc; font-size: 0.95rem; }
+
+.game-result { padding: 1.5rem 0.25rem 0.75rem; text-align: center; }
+.game-result h3 { font-size: 1.6rem; }
+.game-result h3:focus { outline: none; }
+.game-result p { max-width: 36rem; margin: 0.6rem auto 1.25rem; color: var(--muted); }
+
+/* 10. Game 3: Password Puzzle
+   ========================================================================== */
+.puzzle-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  gap: clamp(1.25rem, 4vw, 2.5rem);
+  align-items: start;
+}
+
+.puzzle-clue { margin-bottom: 1rem; }
+.puzzle-clue-label {
+  margin-right: 0.35rem;
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--accent-2);
+  border-radius: 999px;
+  color: var(--accent-2);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.puzzle-grid { display: grid; gap: 0.35rem; }
+.puzzle-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.35rem; }
+
+.tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 3.6vw, 1.3rem);
+  font-weight: 650;
+  text-transform: uppercase;
+}
+.tile-mark {
+  position: absolute;
+  top: 0.05rem;
+  right: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
+.is-correct { border-color: transparent; background: var(--ok); color: var(--on-ok); }
+.is-present { border-color: transparent; background: var(--warn); color: var(--on-warn); }
+.is-absent { border-color: transparent; background: var(--tile-absent); color: var(--on-tile-absent); }
+.tile.is-correct, .tile.is-present, .tile.is-absent { animation: tile-in 0.35s var(--ease-out) backwards; }
+.tile:nth-child(2) { animation-delay: 60ms; }
+.tile:nth-child(3) { animation-delay: 120ms; }
+.tile:nth-child(4) { animation-delay: 180ms; }
+.tile:nth-child(5) { animation-delay: 240ms; }
+.tile:nth-child(6) { animation-delay: 300ms; }
+
+@keyframes tile-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: none; }
+}
+
+.puzzle-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-top: 0.85rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.puzzle-legend li { display: flex; align-items: center; gap: 0.35rem; }
+.tile-sample {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+}
+
+.puzzle-form label { display: block; margin-bottom: 0.3rem; font-weight: 600; }
+.puzzle-input-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.puzzle-input {
+  flex: 1 1 8rem;
+  min-width: 0;
+  min-height: 2.9rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.puzzle-input:disabled { opacity: 0.55; }
+.puzzle-form + .game-message { margin-top: 0.6rem; }
+
+.puzzle-lesson {
+  margin-top: 1.1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-subtle);
+  font-size: 0.95rem;
+}
+.puzzle-lesson p { margin-top: 0.55rem; }
+.puzzle-lesson .button { margin-top: 1rem; }
+
+/* On phones the guess box moves above the grid, so earlier guesses stay in view
+   while the on-screen keyboard is open. */
+@media (max-width: 760px) {
+  .puzzle-layout { display: flex; flex-direction: column; align-items: stretch; gap: 0.85rem; }
+  .puzzle-layout > div { display: contents; }
+  .puzzle-clue { order: 1; margin-bottom: 0; }
+  .puzzle-form { order: 2; }
+  .puzzle-form + .game-message { order: 3; margin-top: -0.35rem; }
+  .puzzle-grid { order: 4; }
+  .puzzle-legend { order: 5; margin-top: 0; }
+  .puzzle-lesson { order: 6; margin-top: 0; }
+}
+
+/* 11. Footer
+   ========================================================================== */
+.site-footer { padding-block: 1rem 2.5rem; }
+.security-note h2 { margin-bottom: 0.85rem; font-size: 1.2rem; }
+.security-note ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 0.75rem 2rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.security-note strong { color: var(--text); }
+.footer-line { margin-top: 1.25rem; color: var(--muted); font-size: 0.88rem; text-align: center; }
+
+/* 12. Scroll animations and motion preferences
+   ========================================================================== */
+
+/* Only hide content for animation when JavaScript is there to reveal it. */
+.js .reveal { opacity: 0; }
+.js .reveal.is-visible {
+  opacity: 1;
+  animation: rise-in 0.8s var(--ease-out) backwards;
+}
+.reveal-group > .is-visible:nth-child(2) { animation-delay: 90ms; }
+.reveal-group > .is-visible:nth-child(3) { animation-delay: 180ms; }
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Entrance for the intro, which is on screen from the start. */
+.hero-copy, .hero-terminal { animation: rise-in 0.9s var(--ease-out) backwards; }
+.hero-terminal { animation-delay: 120ms; }
+
+/* Respect visitors who ask their system for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .js .reveal { opacity: 1; }
+}

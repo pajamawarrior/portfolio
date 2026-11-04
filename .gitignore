@@ -1,0 +1,5 @@
+# Lint tooling, installed with npm ci
+node_modules/
+
+# The folder the pipeline assembles for deployment
+_site/

@@ -1,0 +1,18 @@
+# Keeps the pinned GitHub Actions in the pipeline up to date.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Wait a week before proposing a new release, so a compromised or broken
+    # version has time to be spotted and pulled first.
+    cooldown:
+      default-days: 7
+    # One pull request a week for all actions, rather than one for each.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: ci

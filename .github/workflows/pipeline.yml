@@ -1,0 +1,171 @@
+# Security checks and deployment for the portfolio site.
+#
+#   codeql ───┐
+#   gitleaks ─┼─> package ──> deploy     (package and deploy: main branch only)
+#   lint ─────┘
+#
+# package and deploy "need" all three checks, so if any check fails or is
+# cancelled, nothing is published. See "Security pipeline" in README.md.
+#
+# Actions are pinned to full commit SHAs, because a tag like v4 can be moved to
+# different code. Dependabot keeps the SHAs and the version comments up to date.
+name: DevSecOps pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Weekly re-scan, because new detection rules can find problems in old code.
+  # Scheduled runs never deploy.
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+# Nothing by default. Each job asks for only what it needs.
+permissions: {}
+
+# A new commit on a pull request replaces the run for the old one. Runs on main
+# are never cancelled, so every commit that reaches main gets checked.
+concurrency:
+  group: pipeline-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write # to upload results to the Security tab
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up CodeQL
+        uses: github/codeql-action/init@1fc58d04a4d4374f921bdac573c3811c240f9c26 # v4.39.2
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          queries: security-extended
+
+      - name: Analyse
+        uses: github/codeql-action/analyze@1fc58d04a4d4374f921bdac573c3811c240f9c26 # v4.39.2
+        with:
+          category: /language:javascript-typescript
+          output: sarif-results
+
+      # The analyze step only uploads results and succeeds even when it finds
+      # something, so this step is what makes a finding block the deployment.
+      # If the results are missing, jq errors and the job fails, which is the
+      # safe way round.
+      - name: Fail if CodeQL found anything
+        shell: bash
+        run: |
+          findings='[.[].runs[].results[]? | select((.suppressions // []) | length == 0)]'
+          count=$(jq -s "$findings | length" sarif-results/*.sarif)
+          if [ "$count" -ne 0 ]; then
+            jq -rs "$findings | .[] | \"::error file=\(.locations[0].physicalLocation.artifactLocation.uri),line=\(.locations[0].physicalLocation.region.startLine)::\(.ruleId): \(.message.text)\"" sarif-results/*.sarif
+            echo "CodeQL reported $count finding(s), so this run will not deploy."
+            exit 1
+          fi
+          echo "CodeQL reported no findings."
+
+  gitleaks:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read # to list the commits in a pull request
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Scan for secrets
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          # The report would be a public download on a public repository.
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+
+  lint:
+    name: HTML and JavaScript lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      # Exact versions from the lockfile. Install scripts are skipped, so a
+      # compromised package can't run code just by being installed.
+      - name: Install lint tools
+        run: npm ci --ignore-scripts
+
+      - name: Run linters
+        run: npm run lint
+
+  package:
+    name: Package site
+    needs: [codeql, gitleaks, lint]
+    # Pull requests and scheduled scans stop here.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # An allow-list, so that only the website is published. Config files,
+      # tooling and anything added to the repository later stay out.
+      - name: Collect site files
+        run: |
+          mkdir _site
+          cp index.html style.css script.js _site/
+          cp -R assets _site/assets
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The only job that can change the live site.
+    permissions:
+      pages: write # to publish the site
+      id-token: write # to prove this deployment came from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # Let a deployment in progress finish rather than cutting it off.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

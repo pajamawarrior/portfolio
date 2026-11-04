@@ -1,11 +1,411 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--
+  PERSONALISING THIS PAGE
+  Every personal detail is a placeholder in [square brackets], and every link
+  you need to change contains YOUR- in capitals. Search this file for "[" and
+  "YOUR-" to find them all. The terminal reads its answers from this page, so
+  you only need to edit each detail once, here.
+-->
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aniketh Indiresh Ail</title>
+  <meta charset="UTF-8">
+
+  <!--
+    Content Security Policy. Keep this before anything that loads a resource.
+    - Everything is blocked by default, then scripts, styles and images are
+      allowed from this site only. Inline scripts and styles are not allowed.
+    - No external connections, no forms that can submit, no <base> tag changes.
+    - Trusted Types makes string-to-HTML sinks such as innerHTML throw an error
+      in browsers that support it, as a second line of defence.
+    GitHub Pages cannot set custom response headers, which is why this is a meta
+    tag. Browsers ignore frame-ancestors in a meta tag, so it is left out.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+  <meta name="referrer" content="no-referrer">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>[Your Name] | Cybersecurity &amp; GRC</title>
+  <meta name="description" content="Portfolio of [Your Name], an early-career cybersecurity and GRC professional.">
+  <meta name="theme-color" content="#060913">
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Loaded in the head on purpose: it sets the saved theme before the first
+       paint so light-mode visitors don't see a dark flash. Everything else in
+       the script waits for DOMContentLoaded. -->
+  <script src="script.js"></script>
 </head>
-<body>
-    Hello, I'm Aniketh
+
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+  <!-- ===== Navigation ===== -->
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">&gt;_</span> [Your Name]</a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#challenge">Challenge</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch to light mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+        </button>
+        <button class="icon-button nav-toggle" id="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ===== Intro with interactive terminal ===== -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="status-pill"><span class="status-dot" aria-hidden="true"></span> [Open to: type of role]</p>
+          <h1 id="hero-title">[Your Name]</h1>
+          <p class="hero-role">Early-career cybersecurity &amp; GRC professional</p>
+          <p class="hero-summary">[One line on the problems you want to help organisations solve.]</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#challenge">Take the security challenge</a>
+            <a class="button" href="#contact">Get in touch</a>
+          </div>
+        </div>
+
+        <div class="hero-terminal">
+          <div class="terminal">
+            <div class="terminal-bar" aria-hidden="true">
+              <span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span>
+              <span class="terminal-title">guest@portfolio: ~</span>
+            </div>
+            <!-- Output is built with textContent only (see script.js). -->
+            <div class="terminal-output" id="terminal-output" role="log" aria-label="Terminal output" tabindex="0">
+              <noscript><p class="term-line">This terminal needs JavaScript. Everything it can tell you is also in the sections below.</p></noscript>
+            </div>
+            <form class="terminal-prompt" id="terminal-form" autocomplete="off">
+              <label class="terminal-ps1" for="terminal-input">guest<span class="ps1-host">@portfolio</span>:~$</label>
+              <input class="terminal-input" id="terminal-input" type="text" maxlength="80"
+                     autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">
+            </form>
+          </div>
+          <div class="terminal-chips" role="group" aria-label="Quick commands">
+            <button class="chip" type="button" data-command="help">help</button>
+            <button class="chip" type="button" data-command="about">about</button>
+            <button class="chip" type="button" data-command="skills">skills</button>
+            <button class="chip" type="button" data-command="contact">contact</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== About ===== -->
+    <section class="section" id="about" aria-labelledby="about-title">
+      <div class="container">
+        <p class="eyebrow reveal">~/about</p>
+        <h2 id="about-title" class="reveal">About</h2>
+        <div class="about-grid">
+          <div class="glass panel reveal">
+            <p class="lead" id="about-summary">[Write two or three sentences about who you are, what draws you to cybersecurity and GRC, and what you want to do next.]</p>
+            <p id="about-detail">[Add a short paragraph on your background and how you like to work.]</p>
+          </div>
+          <dl class="glass panel facts reveal" id="about-facts">
+            <div><dt>Location</dt><dd>[City, Country]</dd></div>
+            <div><dt>Focus</dt><dd>[Your areas of focus]</dd></div>
+            <div><dt>Looking for</dt><dd>[Type of role]</dd></div>
+            <div><dt>Availability</dt><dd>[When you can start]</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Skills and certifications ===== -->
+    <section class="section" id="skills" aria-labelledby="skills-title">
+      <div class="container">
+        <p class="eyebrow reveal">~/skills</p>
+        <h2 id="skills-title" class="reveal">Skills &amp; Certifications</h2>
+
+        <!-- Rename the groups to suit you. Copy a <li> to add a skill. -->
+        <div class="card-grid reveal-group">
+          <article class="glass panel card-hover reveal" data-skill-group>
+            <h3>Governance, Risk &amp; Compliance</h3>
+            <ul class="tag-list">
+              <li>[Framework or standard]</li>
+              <li>[Risk or audit skill]</li>
+              <li>[Policy or compliance skill]</li>
+            </ul>
+          </article>
+          <article class="glass panel card-hover reveal" data-skill-group>
+            <h3>Technical Security</h3>
+            <ul class="tag-list">
+              <li>[Security domain]</li>
+              <li>[Technical skill]</li>
+              <li>[Scripting language]</li>
+            </ul>
+          </article>
+          <article class="glass panel card-hover reveal" data-skill-group>
+            <h3>Tools</h3>
+            <ul class="tag-list">
+              <li>[Tool]</li>
+              <li>[Tool]</li>
+              <li>[Tool]</li>
+            </ul>
+          </article>
+        </div>
+
+        <h3 class="subheading reveal">Certifications</h3>
+        <!-- List only what you hold or are studying for. Copy or delete cards as needed. -->
+        <ul class="cert-grid reveal-group">
+          <li class="glass cert-card card-hover reveal">
+            <p class="cert-name">[Certification name]</p>
+            <p class="cert-meta">[Issuing body] <span aria-hidden="true">/</span> [Year, or "In progress"]</p>
+          </li>
+          <li class="glass cert-card card-hover reveal">
+            <p class="cert-name">[Certification name]</p>
+            <p class="cert-meta">[Issuing body] <span aria-hidden="true">/</span> [Year, or "In progress"]</p>
+          </li>
+          <li class="glass cert-card card-hover reveal">
+            <p class="cert-name">[Certification name]</p>
+            <p class="cert-meta">[Issuing body] <span aria-hidden="true">/</span> [Year, or "In progress"]</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Experience ===== -->
+    <section class="section" id="experience" aria-labelledby="experience-title">
+      <div class="container">
+        <p class="eyebrow reveal">~/experience</p>
+        <h2 id="experience-title" class="reveal">Experience</h2>
+
+        <!-- Projects, labs, study and volunteering all count at an early-career stage. -->
+        <ol class="timeline">
+          <li class="timeline-item glass panel card-hover reveal">
+            <p class="timeline-date">[Start date] to [End date]</p>
+            <h3>[Job title]</h3>
+            <p class="timeline-org">[Organisation]</p>
+            <ul>
+              <li>[What you did and what changed because of it.]</li>
+              <li>[What you did and what changed because of it.]</li>
+            </ul>
+          </li>
+          <li class="timeline-item glass panel card-hover reveal">
+            <p class="timeline-date">[Date]</p>
+            <h3>[Project or lab name]</h3>
+            <p class="timeline-org">[Personal project, course or team]</p>
+            <ul>
+              <li>[What you built or assessed, and what you learned.]</li>
+            </ul>
+          </li>
+          <li class="timeline-item glass panel card-hover reveal">
+            <p class="timeline-date">[Start date] to [End date]</p>
+            <h3>[Qualification or volunteer role]</h3>
+            <p class="timeline-org">[Institution or organisation]</p>
+            <ul>
+              <li>[Relevant modules, responsibilities or achievements.]</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== Security challenge: three tabbed mini-games ===== -->
+    <section class="section" id="challenge" aria-labelledby="challenge-title">
+      <div class="container">
+        <p class="eyebrow reveal">~/challenge</p>
+        <h2 id="challenge-title" class="reveal">Security Challenge</h2>
+        <p class="section-intro reveal">Three quick games on the kinds of risk people meet every day. Every company, person and web address in them is made up.</p>
+
+        <noscript><p class="glass panel">These games need JavaScript. The rest of the site works without it.</p></noscript>
+
+        <div class="glass game-shell reveal">
+          <div class="tabs" role="tablist" aria-label="Security challenge games">
+            <button class="tab" id="tab-vuln" type="button" role="tab" aria-selected="true" aria-controls="panel-vuln">Find the Vulnerability</button>
+            <button class="tab" id="tab-phish" type="button" role="tab" aria-selected="false" aria-controls="panel-phish" tabindex="-1">Phishing Spotter</button>
+            <button class="tab" id="tab-puzzle" type="button" role="tab" aria-selected="false" aria-controls="panel-puzzle" tabindex="-1">Password Puzzle</button>
+          </div>
+
+          <!-- Game 1: Find the Vulnerability -->
+          <div class="tab-panel" id="panel-vuln" role="tabpanel" aria-labelledby="tab-vuln" tabindex="0">
+            <div class="game-header">
+              <p>This login page has <strong>6 security problems</strong>. Click anything that looks risky, but watch out for false positives.</p>
+              <p class="game-score" id="vuln-score" role="status">Found 0 of 6 <span aria-hidden="true">/</span> 0 false positives</p>
+            </div>
+
+            <div class="vuln-layout">
+              <div>
+                <!-- A picture of a login page built from buttons. There are deliberately
+                     no real inputs or forms here, so nobody can type a password into it. -->
+                <div class="mock-browser" id="vuln-stage" role="group" aria-label="Simulated login page. Each part is a button you can inspect.">
+                  <div class="mock-bar">
+                    <span class="mock-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                    <div class="mock-url">
+                      <button class="spot" type="button" data-finding="http">http://</button>
+                      <button class="spot" type="button" data-decoy="domain">login.acme-portal.example/auth</button>
+                      <button class="spot" type="button" data-finding="url-creds">?user=admin&amp;pass=Summer2024</button>
+                    </div>
+                  </div>
+                  <div class="mock-page">
+                    <button class="spot mock-logo" type="button" data-decoy="logo">Acme Portal</button>
+                    <p class="mock-title">Sign in to your account</p>
+                    <button class="spot mock-error" type="button" data-finding="enumeration">Incorrect password for admin. That username is valid.</button>
+                    <span class="mock-label">Username</span>
+                    <button class="spot mock-field" type="button" data-decoy="username">admin</button>
+                    <span class="mock-label">Password</span>
+                    <button class="spot mock-field" type="button" data-decoy="password" aria-label="Password field, masked">&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;</button>
+                    <button class="spot mock-submit" type="button" data-decoy="signin">Sign in</button>
+                    <button class="spot mock-note" type="button" data-finding="lockout">Attempt 1,482. Unlimited retries allowed.</button>
+                    <button class="spot mock-link" type="button" data-finding="recovery">Forgot password? We'll email it to you.</button>
+                    <button class="spot mock-comment" type="button" data-finding="debug">&lt;!-- TODO: remove before go-live. test login: admin / admin123 --&gt;</button>
+                    <button class="spot mock-link mock-small" type="button" data-decoy="privacy">Privacy policy</button>
+                  </div>
+                </div>
+                <p class="game-note">Simulation only. There are no real fields here and nothing is sent anywhere.</p>
+                <div class="game-actions">
+                  <button class="button button-small" id="vuln-reveal" type="button">Reveal the rest</button>
+                  <button class="button button-small" id="vuln-reset" type="button">Start again</button>
+                </div>
+              </div>
+
+              <div class="vuln-report">
+                <h3>Findings report</h3>
+                <p class="game-message" id="vuln-message" role="status">No findings yet. Pick something on the page to inspect it.</p>
+                <ol class="report-list" id="vuln-report"></ol>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game 2: Phishing Spotter -->
+          <div class="tab-panel" id="panel-phish" role="tabpanel" aria-labelledby="tab-phish" tabindex="0" hidden>
+            <div class="game-header">
+              <p>Read each email and decide: <strong>safe, or phishing?</strong> Check the sender, the link and what it asks you to do.</p>
+              <p class="game-score"><span id="phish-progress">Email 1 of 6</span> <span aria-hidden="true">/</span> <span id="phish-score">Score 0</span></p>
+            </div>
+
+            <div id="phish-round">
+              <article class="email" id="phish-email">
+                <h3 class="email-subject" id="phish-subject" tabindex="-1"></h3>
+                <dl class="email-meta">
+                  <div><dt>From</dt><dd id="phish-from"></dd></div>
+                  <div id="phish-reply-row" hidden><dt>Reply-to</dt><dd id="phish-reply"></dd></div>
+                </dl>
+                <div class="email-body" id="phish-body"></div>
+                <p class="email-extra" id="phish-attachment" hidden></p>
+                <p class="email-extra" id="phish-link" hidden></p>
+              </article>
+
+              <div class="game-actions" id="phish-actions">
+                <button class="button" id="phish-safe" type="button">Looks safe</button>
+                <button class="button" id="phish-fake" type="button">It's phishing</button>
+              </div>
+
+              <div id="phish-feedback" role="status"></div>
+              <div class="game-actions">
+                <button class="button button-primary" id="phish-next" type="button" hidden>Next email</button>
+              </div>
+            </div>
+
+            <div class="game-result" id="phish-result" hidden>
+              <h3 id="phish-result-title" tabindex="-1"></h3>
+              <p id="phish-result-text"></p>
+              <button class="button button-primary" id="phish-again" type="button">Play again</button>
+            </div>
+          </div>
+
+          <!-- Game 3: Password Puzzle -->
+          <div class="tab-panel" id="panel-puzzle" role="tabpanel" aria-labelledby="tab-puzzle" tabindex="0" hidden>
+            <div class="game-header">
+              <p>A leaked password list has one <strong>very common 6-character password</strong> on it. Crack it in 6 guesses using the clue. Please don't type a real password: these are all guesses at someone else's bad one.</p>
+            </div>
+
+            <div class="puzzle-layout">
+              <div>
+                <p class="puzzle-clue"><span class="puzzle-clue-label">Clue</span> <span id="puzzle-clue"></span></p>
+                <div class="puzzle-grid" id="puzzle-grid"></div>
+                <ul class="puzzle-legend" aria-label="What the tile markers mean">
+                  <li><span class="tile-sample is-correct" aria-hidden="true">&#10003;</span> Right place</li>
+                  <li><span class="tile-sample is-present" aria-hidden="true">~</span> Wrong place</li>
+                  <li><span class="tile-sample is-absent" aria-hidden="true">&#215;</span> Not in it</li>
+                </ul>
+              </div>
+
+              <div>
+                <form class="puzzle-form" id="puzzle-form" autocomplete="off" novalidate>
+                  <label for="puzzle-input">Your guess</label>
+                  <div class="puzzle-input-row">
+                    <input class="puzzle-input" id="puzzle-input" type="text" maxlength="6"
+                           autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+                    <button class="button button-primary" id="puzzle-submit" type="submit">Guess</button>
+                  </div>
+                </form>
+                <p class="game-message" id="puzzle-message" role="status">Letters and numbers only.</p>
+                <div class="puzzle-lesson" id="puzzle-lesson" hidden>
+                  <h3>Why it fell</h3>
+                  <p id="puzzle-note"></p>
+                  <p>There are about 2.2 billion possible passwords of 6 lowercase letters and digits. At 10 billion guesses a second against a fast, unsalted hash, trying them all takes under a second. A random five-word passphrase would take about 90 years at the same speed.</p>
+                  <p><strong>Better habit:</strong> let a password manager create a long, unique password for each account, and turn on multi-factor authentication.</p>
+                  <button class="button button-primary" id="puzzle-again" type="button">Try another password</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Contact ===== -->
+    <section class="section" id="contact" aria-labelledby="contact-title">
+      <div class="container">
+        <p class="eyebrow reveal">~/contact</p>
+        <h2 id="contact-title" class="reveal">Contact</h2>
+        <p class="section-intro reveal">[One line on what you're looking for and the best way to reach you.]</p>
+
+        <div class="contact-grid reveal-group">
+          <a class="glass contact-card card-hover reveal" data-contact-link data-label="LinkedIn"
+             href="https://www.linkedin.com/in/YOUR-LINKEDIN-HANDLE" target="_blank" rel="noopener noreferrer">
+            <span class="contact-title">LinkedIn</span>
+            <span class="contact-detail">[linkedin.com/in/your-handle]</span>
+            <span class="sr-only">(opens in a new tab)</span>
+          </a>
+          <a class="glass contact-card card-hover reveal" data-contact-link data-label="GitHub"
+             href="https://github.com/YOUR-GITHUB-USERNAME" target="_blank" rel="noopener noreferrer">
+            <span class="contact-title">GitHub</span>
+            <span class="contact-detail">[github.com/your-username]</span>
+            <span class="sr-only">(opens in a new tab)</span>
+          </a>
+          <!-- Replace assets/cv-placeholder.pdf with your CV, and update both names here. -->
+          <a class="glass contact-card card-hover reveal" data-contact-link data-label="CV"
+             href="assets/cv-placeholder.pdf" download="Your-Name-CV.pdf">
+            <span class="contact-title">Download CV</span>
+            <span class="contact-detail">PDF</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer and security note ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="glass panel security-note">
+        <h2>How this site is secured</h2>
+        <ul>
+          <li><strong>Content Security Policy:</strong> only scripts, styles and images from this site can load, with no inline scripts or third-party code.</li>
+          <li><strong>Safe output:</strong> anything you type is shown with <code>textContent</code>, never <code>innerHTML</code>, so it can't run as code.</li>
+          <li><strong>Nothing to steal:</strong> no backend, secrets, API keys, cookies or trackers. Your theme choice is the only thing stored, and it stays in your browser.</li>
+          <li><strong>Known limit:</strong> GitHub Pages can't set custom security headers, so other sites could frame this page. That risk is accepted because there are no logins or sensitive actions here.</li>
+        </ul>
+      </div>
+      <p class="footer-line">&copy; [Your Name]. Built with plain HTML, CSS and JavaScript.</p>
+    </div>
+  </footer>
 </body>
 </html>
