@@ -51,6 +51,7 @@
         <li><a href="#experience">Experience</a></li>
         <li><a href="#projects">Projects</a></li>
         <li><a href="#challenge">Challenge</a></li>
+        <li><a href="#threat-model">Threat Model</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
 
@@ -538,11 +539,100 @@
       </div>
     </section>
 
+    <!-- ===== Threat model and risk matrix game ===== -->
+    <section class="section" id="threat-model" aria-labelledby="threat-model-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="section-number" aria-hidden="true">07</span>
+          <h2 id="threat-model-title">Threat Model</h2>
+        </header>
+        <p class="section-intro reveal">I ran STRIDE over this site. Pick a part of it to see what could go wrong, how I rate that risk now the controls are in place, and where each control lives in the <a href="https://github.com/pajamawarrior/portfolio" target="_blank" rel="noopener noreferrer">code<span class="sr-only"> (opens in a new tab)</span></a>. Where something isn't covered, it says so.</p>
+
+        <noscript><p class="glass panel">The threat model and risk game need JavaScript. The rest of the site works without it.</p></noscript>
+
+        <div class="tm-layout reveal">
+          <!-- The site's architecture. Each component's threats are in script.js. -->
+          <div class="tm-diagram" id="tm-diagram" role="group" aria-label="Architecture of this site. Each component is a button that shows its threats.">
+            <div class="tm-zone">
+              <p class="tm-zone-label">Trust boundary: GitHub</p>
+              <button class="tm-node" type="button" data-component="pipeline" aria-pressed="false">
+                <span class="tm-node-name">GitHub Actions pipeline</span>
+                <span class="tm-node-role">Checks the code, then deploys it</span>
+                <span class="tm-node-rating" data-node-rating></span>
+              </button>
+              <p class="tm-flow"><span aria-hidden="true">&darr;</span> deploys</p>
+              <button class="tm-node" type="button" data-component="pages" aria-pressed="false">
+                <span class="tm-node-name">GitHub Pages hosting</span>
+                <span class="tm-node-role">Serves the static files</span>
+                <span class="tm-node-rating" data-node-rating></span>
+              </button>
+            </div>
+
+            <p class="tm-flow"><span aria-hidden="true">&darr;</span> serves</p>
+
+            <div class="tm-zone">
+              <p class="tm-zone-label">Trust boundary: your device</p>
+              <button class="tm-node" type="button" data-component="browser" aria-pressed="false">
+                <span class="tm-node-name">Visitor's browser</span>
+                <span class="tm-node-role">Runs everything you see</span>
+                <span class="tm-node-rating" data-node-rating></span>
+              </button>
+              <p class="tm-flow"><span aria-hidden="true">&darr;</span> runs</p>
+              <div class="tm-node-pair">
+                <button class="tm-node" type="button" data-component="terminal" aria-pressed="false">
+                  <span class="tm-node-name">Terminal intro</span>
+                  <span class="tm-node-role">Takes typed commands</span>
+                  <span class="tm-node-rating" data-node-rating></span>
+                </button>
+                <button class="tm-node" type="button" data-component="games" aria-pressed="false">
+                  <span class="tm-node-name">Mini-games</span>
+                  <span class="tm-node-role">Fake logins, emails and guesses</span>
+                  <span class="tm-node-rating" data-node-rating></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass tm-detail" id="tm-detail" aria-live="polite"></div>
+        </div>
+        <p class="tm-scale reveal">Ratings are my own judgement of the risk left after the controls, scored as likelihood &times; impact out of 25: Low 1&ndash;5, Medium 6&ndash;14, High 15&ndash;25.</p>
+
+        <h3 class="subheading reveal" id="risk-game-title">Risk matrix game</h3>
+        <p class="section-intro risk-intro reveal">Your turn. Imagine you look after ICT risk at a mid-sized EU bank under DORA. Place all six risks on the grid, then compare your ratings with mine. The bank is made up, and DORA doesn't set these scores, so treat mine as one reasonable view.</p>
+
+        <div class="glass risk-game reveal">
+          <div class="risk-layout">
+            <div>
+              <p class="risk-how">Drag a risk onto the grid, or select it and then tap a square. On a keyboard, press Enter on a risk, use the arrow keys to move around the grid, and press Enter to place it.</p>
+              <div class="risk-tray" id="risk-tray" role="group" aria-label="Risks to place"></div>
+            </div>
+            <div>
+              <p class="risk-current" id="risk-status" role="status"></p>
+              <div class="risk-board">
+                <p class="risk-axis risk-axis-y">Likelihood <span aria-hidden="true">&rarr;</span></p>
+                <div class="risk-grid" id="risk-grid" role="group" aria-label="Five by five risk grid. Use the arrow keys to move between squares."></div>
+                <p class="risk-axis risk-axis-x">Impact <span aria-hidden="true">&rarr;</span></p>
+              </div>
+              <div class="game-actions">
+                <button class="button button-primary" id="risk-check" type="button" disabled>Compare with mine</button>
+                <button class="button" id="risk-reset" type="button">Start again</button>
+              </div>
+            </div>
+          </div>
+          <div id="risk-feedback" hidden>
+            <h4 class="risk-result-title" id="risk-result-title" tabindex="-1"></h4>
+            <p class="risk-legend"><strong>R1</strong> is where you put a risk. <span class="risk-legend-mine">&#9671;R1</span> is where I'd put it.</p>
+            <ol class="risk-results" id="risk-results"></ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== Contact ===== -->
     <section class="section" id="contact" aria-labelledby="contact-title">
       <div class="container">
         <header class="section-head reveal">
-          <span class="section-number" aria-hidden="true">07</span>
+          <span class="section-number" aria-hidden="true">08</span>
           <h2 id="contact-title">Say hello</h2>
         </header>
         <p class="section-intro reveal">LinkedIn is the best way to reach me.</p>

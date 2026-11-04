@@ -2,7 +2,7 @@
 
 [![DevSecOps pipeline](../../actions/workflows/pipeline.yml/badge.svg)](../../actions/workflows/pipeline.yml)
 
-The personal portfolio of Aniketh Indiresh Ail, a Cybersecurity Risk & GRC Analyst in Dublin, Ireland. It is a single page built with plain HTML, CSS and JavaScript, with an interactive terminal and three security mini-games.
+The personal portfolio of Aniketh Indiresh Ail, a Cybersecurity Risk & GRC Analyst in Dublin, Ireland. It is a single page built with plain HTML, CSS and JavaScript, with an interactive terminal, three security mini-games, a clickable STRIDE threat model of the site, and a DORA-inspired risk matrix game.
 
 ## Project layout
 

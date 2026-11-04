@@ -15,9 +15,10 @@
      9. Game 1: Find the Vulnerability
     10. Game 2: Phishing Spotter
     11. Game 3: Password Puzzle
-    12. Contact and risk register
-    13. Footer
-    14. Scroll animations and motion preferences
+    12. Threat model and risk matrix game
+    13. Contact and risk register
+    14. Footer
+    15. Scroll animations and motion preferences
    ========================================================================== */
 
 /* 1. Fonts (SIL Open Font License, see assets/fonts)
@@ -295,7 +296,7 @@ body::after {
 
 .nav-toggle { display: none; }
 
-@media (max-width: 960px) {
+@media (max-width: 1080px) {
   .nav-toggle { display: grid; }
   .nav { position: relative; flex-wrap: wrap; }
   .nav-links {
@@ -1185,7 +1186,273 @@ h1 {
   .puzzle-lesson { order: 6; margin-top: 0; }
 }
 
-/* 12. Contact and risk register
+/* 12. Threat model and risk matrix game
+   ========================================================================== */
+.section-intro a { color: var(--accent); }
+
+.tm-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* The diagram: two trust boundaries with data flowing from one to the other. */
+.tm-diagram { display: grid; gap: 0.5rem; }
+.tm-zone {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+}
+.tm-zone-label {
+  margin-bottom: 0.25rem;
+  color: var(--accent-2);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tm-flow {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  text-align: center;
+}
+.tm-flow span { color: var(--accent); }
+.tm-node-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.tm-node {
+  display: grid;
+  gap: 0.15rem;
+  align-content: start;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.tm-node:hover { border-color: var(--border-strong); box-shadow: var(--glow); }
+.tm-node[aria-pressed="true"] { border-color: var(--accent); box-shadow: var(--glow-strong); }
+.tm-node-name { font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+.tm-node[aria-pressed="true"] .tm-node-name { color: var(--accent); }
+.tm-node-role { color: var(--muted); font-size: 0.82rem; line-height: 1.3; }
+.tm-node-rating { margin-top: 0.3rem; }
+
+/* Ratings always spell out the word, so colour is never the only signal. */
+.rating {
+  display: inline-block;
+  padding: 0 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rating-low { color: var(--ok); }
+.rating-medium { color: var(--warn); }
+.rating-high { color: var(--bad); }
+
+.tm-detail { padding: clamp(1.1rem, 2.5vw, 1.6rem); scroll-margin-top: calc(var(--header-height) + 1rem); }
+.tm-detail-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.75rem; }
+.tm-detail-head h3 { font-size: 1.4rem; }
+.tm-stride { display: flex; gap: 0.25rem; margin-top: 0.75rem; }
+.tm-stride li {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.tm-stride li.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+.tm-threats { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.tm-threat {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+.tm-threat-category {
+  color: var(--accent-2);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+.tm-threat-title { font-weight: 600; }
+.tm-threat-score { margin-top: 0.3rem; color: var(--muted); font-size: 0.84rem; }
+.tm-threat-score .rating { margin-right: 0.4rem; }
+.tm-controls { margin-top: 0.55rem; padding-left: 1.05rem; list-style: square; }
+.tm-controls li::marker { color: var(--accent); }
+.tm-control-where {
+  display: block;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  overflow-wrap: anywhere;
+}
+.tm-gap {
+  margin-top: 0.55rem;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--accent-2);
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.tm-gap strong { color: var(--text); }
+.tm-scale { margin-top: 1rem; color: var(--muted); font-size: 0.85rem; }
+
+/* Risk matrix game */
+.risk-intro { margin-top: 0; }
+.risk-game { padding: clamp(1rem, 2.5vw, 1.6rem); }
+.risk-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  align-items: start;
+}
+.risk-how { margin-bottom: 0.75rem; color: var(--muted); font-size: 0.88rem; }
+.risk-tray { display: grid; gap: 0.45rem; }
+
+.risk-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  cursor: grab;
+  user-select: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.risk-card:hover { border-color: var(--border-strong); }
+.risk-card[aria-pressed="true"] { border-color: var(--accent); box-shadow: var(--glow-strong); }
+.risk-card[aria-disabled="true"] { cursor: default; }
+.risk-card.is-dragging { opacity: 0.55; }
+.risk-code { color: var(--accent); font-family: var(--font-mono); font-weight: 600; }
+.risk-place {
+  grid-column: 2;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+
+.risk-current { min-height: 2.9em; margin-bottom: 0.5rem; font-size: 0.92rem; line-height: 1.4; }
+.risk-board {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.3rem;
+}
+.risk-axis {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.risk-axis-y { writing-mode: vertical-rl; transform: rotate(180deg); }
+.risk-axis-x { grid-column: 2; }
+.risk-grid {
+  display: grid;
+  grid-template-columns: 1rem repeat(5, minmax(0, 1fr));
+  gap: 3px;
+}
+.risk-tick {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.risk-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 0 0.25rem;
+  min-width: 0;
+  min-height: clamp(2.75rem, 11vw, 4rem);
+  padding: 0.1rem;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: var(--matrix-low);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.risk-cell.is-mid { background: var(--matrix-mid); }
+.risk-cell.is-high { background: var(--matrix-high); }
+.risk-cell:hover, .risk-cell.is-over { border-color: var(--accent); }
+.risk-cell:focus-visible { outline-offset: 1px; }
+.risk-cell[aria-disabled="true"] { cursor: default; }
+.risk-mark { font-weight: 600; }
+.risk-mark-mine { font-weight: 400; }
+
+.risk-result-title { margin-top: 1.5rem; font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; }
+.risk-result-title:focus { outline: none; }
+.risk-legend { margin-top: 0.2rem; color: var(--muted); font-size: 0.85rem; }
+.risk-legend strong { color: var(--text); font-family: var(--font-mono); }
+.risk-legend-mine { color: var(--text); font-family: var(--font-mono); }
+.risk-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+.risk-result {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.risk-result.is-off { border-left-color: var(--accent-2); }
+.risk-result-name { font-weight: 600; }
+.risk-result-scores { margin-top: 0.25rem; color: var(--muted); font-size: 0.84rem; }
+.risk-result-scores .rating { margin-inline: 0.1rem; }
+.risk-result-verdict { margin-top: 0.25rem; font-weight: 600; }
+.risk-result-why { margin-top: 0.25rem; }
+.risk-result-dora { margin-top: 0.3rem; color: var(--muted); font-size: 0.82rem; }
+
+@media (max-width: 900px) {
+  .tm-layout, .risk-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 420px) {
+  .tm-node-pair { grid-template-columns: minmax(0, 1fr); }
+  .risk-cell { font-size: 0.66rem; }
+}
+
+/* 13. Contact and risk register
    ========================================================================== */
 .contact-grid {
   display: grid;
@@ -1239,7 +1506,7 @@ h1 {
   }
 }
 
-/* 13. Footer
+/* 14. Footer
    ========================================================================== */
 .site-footer { padding-block: 1rem 2.5rem; }
 .security-note h2 { margin-bottom: 0.85rem; font-size: 1.2rem; letter-spacing: 0; }
@@ -1253,7 +1520,7 @@ h1 {
 .security-note strong { color: var(--text); }
 .footer-line { margin-top: 1.25rem; color: var(--muted); font-size: 0.88rem; text-align: center; }
 
-/* 14. Scroll animations and motion preferences
+/* 15. Scroll animations and motion preferences
    ========================================================================== */
 
 /* Only hide content for animation when JavaScript is there to reveal it. */
