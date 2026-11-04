@@ -122,13 +122,14 @@
                      autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">
             </form>
           </div>
-          <div class="terminal-chips" role="group" aria-label="Quick commands">
-            <button class="chip" type="button" data-command="help">help</button>
+          <!-- Each chip types its data-command into the terminal, then runs it. -->
+          <p class="chips-label" id="chips-label">Not a terminal person? Try one:</p>
+          <div class="terminal-chips" role="group" aria-labelledby="chips-label">
             <button class="chip" type="button" data-command="about">about</button>
             <button class="chip" type="button" data-command="skills">skills</button>
             <button class="chip" type="button" data-command="experience">experience</button>
             <button class="chip" type="button" data-command="projects">projects</button>
-            <button class="chip" type="button" data-command="contact">contact</button>
+            <button class="chip chip-primary" type="button" data-command="sudo hire aniketh">hire me</button>
           </div>
         </div>
 

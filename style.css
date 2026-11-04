@@ -633,10 +633,16 @@ h1 {
 /* The input has no outline of its own, so the whole prompt shows focus. */
 .terminal-prompt:focus-within { box-shadow: inset 0 0 0 1px var(--term-accent); }
 
-.terminal-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+.chips-label {
+  margin-top: 0.7rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+.terminal-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.35rem; }
 .chip {
   min-height: 2.75rem;
-  padding: 0.25rem 0.8rem;
+  padding: 0.25rem 0.7rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -647,6 +653,10 @@ h1 {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .chip:hover { border-color: var(--border-strong); box-shadow: var(--glow); }
+.chip::before { content: "> "; color: var(--muted); }
+.chip.is-running { border-color: var(--accent); box-shadow: var(--glow-strong); }
+.chip-primary { border-color: transparent; background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.chip-primary::before { color: var(--on-accent); }
 
 /* My route, drawn as a traceroute with a packet travelling along it. */
 .route { grid-column: 1 / -1; }

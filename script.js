@@ -575,7 +575,7 @@
     const BOOT_LINES = [
       { text: 'Starting session...', className: 'term-muted' },
       { text: 'Cookies: 0   Trackers: 0   Third-party scripts: 0', className: 'term-muted' },
-      { text: 'Hi, I\'m Aniketh. Type "help" to look around.', className: 'term-accent' },
+      { text: 'Hi, I\'m Aniketh. Type "help", or pick a suggestion below.', className: 'term-accent' },
     ];
 
     const history = [];
@@ -875,8 +875,61 @@
       input.focus();
     });
 
+    /* Suggestion chips type their command into the prompt, then run it. Focus
+       stays on the chip, so keyboard users don't lose their place and phones don't
+       open the on-screen keyboard. Commands come from index.html, never from input. */
+    const CHIP_TYPE_MS = 45;
+    const CHIP_PAUSE_MS = 180;
+    let chipTimer = null;
+    let activeChip = null;
+
+    function cancelChipTyping() {
+      if (!activeChip) return;
+      clearTimeout(chipTimer);
+      activeChip.classList.remove('is-running');
+      activeChip = null;
+      input.value = '';
+    }
+
+    function playChip(chip) {
+      cancelChipTyping();
+      finishBoot();
+      const command = chip.dataset.command;
+
+      if (prefersReducedMotion()) {
+        runCommand(command);
+        return;
+      }
+
+      activeChip = chip;
+      chip.classList.add('is-running');
+      let typedLength = 0;
+
+      function typeNext() {
+        typedLength += 1;
+        input.value = command.slice(0, typedLength);
+        if (typedLength < command.length) {
+          chipTimer = setTimeout(typeNext, CHIP_TYPE_MS);
+          return;
+        }
+        chipTimer = setTimeout(() => {
+          chip.classList.remove('is-running');
+          activeChip = null;
+          input.value = '';
+          runCommand(command);
+        }, CHIP_PAUSE_MS);
+      }
+      typeNext();
+    }
+
     document.querySelectorAll('.chip[data-command]').forEach((chip) => {
-      chip.addEventListener('click', () => runCommand(chip.dataset.command));
+      chip.addEventListener('click', () => playChip(chip));
+    });
+
+    // If the visitor starts typing or pasting, their input wins.
+    input.addEventListener('beforeinput', cancelChipTyping);
+    input.addEventListener('keydown', (event) => {
+      if (!['Tab', 'Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) cancelChipTyping();
     });
 
     /* Start up */
