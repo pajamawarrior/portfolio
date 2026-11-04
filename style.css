@@ -407,8 +407,39 @@ a.glass:hover, .glass:hover { border-color: var(--border-strong); box-shadow: va
 /* 6. Hero: name, risk matrix, terminal and route
    ========================================================================== */
 .hero {
+  position: relative;
+  isolation: isolate;
   overflow-x: clip;
   padding-block: clamp(2rem, 5vh, 3.5rem) clamp(2rem, 4vh, 3rem);
+}
+
+/* The network graph sits behind the hero and never catches clicks. */
+.hero-network {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(#000 70%, transparent);
+  mask-image: linear-gradient(#000 70%, transparent);
+}
+
+/* The typed line sits exactly on top of the full sentence, which holds the height. */
+.hero-headline { display: grid; }
+.hero-headline > span { grid-area: 1 / 1; }
+.hero-headline-typed { display: none; }
+.hero-headline.is-typing .hero-headline-full { opacity: 0; }
+.hero-headline.is-typing .hero-headline-typed { display: block; }
+.hero-typed { color: var(--accent); }
+.hero-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  background: var(--accent);
+  vertical-align: -0.12em;
+  animation: blink 1.1s steps(1) infinite;
 }
 
 .hero-grid {
@@ -445,8 +476,8 @@ h1 {
   font-weight: 600;
 }
 .hero-place {
-  display: inline-block;
-  margin-left: 0.3rem;
+  display: block;
+  margin-top: 0.3rem;
   color: var(--accent-2);
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -455,6 +486,16 @@ h1 {
 }
 .hero-summary { max-width: 34rem; margin-top: 0.6rem; color: var(--muted); }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.4rem; }
+.hero-availability {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  max-width: 34rem;
+  margin-top: 0.9rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
 
 .status-dot {
   display: inline-block;

@@ -70,6 +70,8 @@
   <main id="main">
     <!-- ===== Intro: name, terminal and route ===== -->
     <section class="hero" aria-labelledby="hero-title">
+      <!-- Decoration: a network graph drawn by script.js. Off on phones and low-power devices. -->
+      <canvas class="hero-network" id="hero-network" aria-hidden="true" hidden></canvas>
       <div class="container hero-grid">
         <div class="hero-copy">
           <p class="hero-kicker">Hi, I'm</p>
@@ -79,12 +81,22 @@
             <span class="name-line" aria-hidden="true" data-scramble>Indiresh</span>
             <span class="name-line name-accent" aria-hidden="true" data-scramble>Ail</span>
           </h1>
-          <p class="hero-role">Cybersecurity Risk &amp; GRC Analyst <span class="hero-place">Dublin, Ireland</span></p>
-          <p class="hero-summary">I ask what could go wrong, what it would cost, and who should have had access in the first place.</p>
+          <!-- The full sentence stays in the page for screen readers, search engines and
+               visitors without JavaScript. script.js types over it when motion is allowed,
+               and it also holds the height so the layout doesn't jump. -->
+          <p class="hero-role">
+            <span class="hero-headline">
+              <span class="hero-headline-full">Cybersecurity professional working across risk, access and security operations.</span>
+              <span class="hero-headline-typed" aria-hidden="true">Cybersecurity professional working across <span class="hero-typed" id="hero-typed"></span><span class="hero-cursor"></span></span>
+            </span>
+            <span class="hero-place">Dublin, Ireland</span>
+          </p>
+          <p class="hero-summary">From risk registers to access control, I help organisations stay secure.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="https://linkedin.com/in/anikethail" target="_blank" rel="noopener noreferrer">Find me on LinkedIn<span class="sr-only"> (opens in a new tab)</span></a>
             <a class="button" href="#challenge">Try my security challenge</a>
           </div>
+          <p class="hero-availability"><span class="status-dot" aria-hidden="true"></span> <span>Securing systems, people and processes. Open to new opportunities in cybersecurity.</span></p>
         </div>
 
         <div class="hero-terminal">

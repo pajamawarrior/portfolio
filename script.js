@@ -4,7 +4,7 @@
      1. Theme (runs straight away to avoid a flash of the wrong theme)
      2. Helpers
      3. Navigation and scroll effects
-     4. Hero: name effect and risk matrix
+     4. Hero: name effect, typing, network graph and risk matrix
      5. Terminal
      6. Tabs
      7. Game 1: Find the Vulnerability
@@ -209,8 +209,297 @@
     update();
   }
 
-  /* 4. Hero: name effect and risk matrix
+  /* 4. Hero: name effect, typing, network graph and risk matrix
      ======================================================================== */
+
+  // Tells a hero animation whether it's worth running: the hero has to be on
+  // screen and the tab has to be in the foreground.
+  function watchHeroVisibility(onChange) {
+    const hero = document.querySelector('.hero');
+    let onScreen = true;
+    const notify = () => onChange(onScreen && !document.hidden);
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        onScreen = entries[entries.length - 1].isIntersecting;
+        notify();
+      }).observe(hero);
+    }
+    document.addEventListener('visibilitychange', notify);
+  }
+
+  // Types and deletes the focus words in the headline. With reduced motion, the
+  // full sentence simply stays on screen.
+  function initHeadlineTyping() {
+    const headline = document.querySelector('.hero-headline');
+    const typed = byId('hero-typed');
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const WORDS = ['risk', 'access', 'security operations'];
+    const TYPE_MS = 75;
+    const DELETE_MS = 40;
+    const HOLD_MS = 1700;
+    const GAP_MS = 350;
+
+    let wordIndex = 0;
+    let length = 0;
+    let deleting = false;
+    let visible = true;
+    let timer = null;
+
+    function step() {
+      const word = WORDS[wordIndex];
+      length += deleting ? -1 : 1;
+      typed.textContent = word.slice(0, length);
+
+      let delay = deleting ? DELETE_MS : TYPE_MS;
+      if (!deleting && length === word.length) {
+        deleting = true;
+        delay = HOLD_MS;
+      } else if (deleting && length === 0) {
+        deleting = false;
+        wordIndex = (wordIndex + 1) % WORDS.length;
+        delay = GAP_MS;
+      }
+      timer = setTimeout(step, delay);
+    }
+
+    function sync() {
+      clearTimeout(timer);
+      timer = null;
+      headline.classList.toggle('is-typing', !motion.matches);
+      if (visible && !motion.matches) timer = setTimeout(step, TYPE_MS);
+    }
+
+    motion.addEventListener('change', sync);
+    watchHeroVisibility((isVisible) => {
+      visible = isVisible;
+      sync();
+    });
+    sync();
+  }
+
+  // Draws a subtle network graph behind the hero that leans away from the mouse.
+  // It stops whenever the hero isn't visible, stays off on phones and low-power
+  // devices, and turns itself off if it can't keep up. Math.random is fine here
+  // because this is only decoration.
+  function initHeroNetwork() {
+    const canvas = byId('hero-network');
+    const hero = canvas.closest('.hero');
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const smallOrTouch = window.matchMedia('(max-width: 767px), (pointer: coarse)');
+
+    const MAX_NODES = 56;
+    const MIN_NODES = 18;
+    const AREA_PER_NODE = 24000;
+    const LINK_DISTANCE = 130;
+    const POINTER_RADIUS = 150;
+    const POINTER_PUSH = 18;
+    const MAX_SPEED = 0.25;
+    const FRAME_MS = 33; // About 30 frames a second is plenty for slow drift.
+    const SAMPLE_FRAMES = 45;
+    const SLOW_FRAME_MS = 60;
+
+    let nodes = [];
+    let width = 0;
+    let height = 0;
+    let color = '';
+    let pointer = null;
+    let density = 1;
+    let gaveUp = false;
+    let visible = true;
+    let frameId = null;
+    let lastFrame = 0;
+    let sampleCount = 0;
+    let sampleTotal = 0;
+
+    function isLowPower() {
+      const { connection, deviceMemory, hardwareConcurrency } = navigator;
+      return smallOrTouch.matches
+        || Boolean(connection && connection.saveData)
+        || (hardwareConcurrency > 0 && hardwareConcurrency <= 2)
+        || (deviceMemory > 0 && deviceMemory <= 2);
+    }
+
+    function seed() {
+      const wanted = Math.round((width * height) / AREA_PER_NODE);
+      const count = Math.round(Math.max(MIN_NODES, Math.min(MAX_NODES, wanted)) * density);
+      nodes = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 2 * MAX_SPEED,
+        vy: (Math.random() - 0.5) * 2 * MAX_SPEED,
+        offsetX: 0,
+        offsetY: 0,
+      }));
+    }
+
+    function update() {
+      nodes.forEach((node) => {
+        node.x += node.vx;
+        node.y += node.vy;
+        if (node.x < 0 || node.x > width) node.vx *= -1;
+        if (node.y < 0 || node.y > height) node.vy *= -1;
+
+        // Ease towards a small push away from the mouse, and back again after.
+        let targetX = 0;
+        let targetY = 0;
+        if (pointer) {
+          const dx = node.x - pointer.x;
+          const dy = node.y - pointer.y;
+          const distance = Math.hypot(dx, dy);
+          if (distance > 0 && distance < POINTER_RADIUS) {
+            const push = (1 - distance / POINTER_RADIUS) * POINTER_PUSH;
+            targetX = (dx / distance) * push;
+            targetY = (dy / distance) * push;
+          }
+        }
+        node.offsetX += (targetX - node.offsetX) * 0.08;
+        node.offsetY += (targetY - node.offsetY) * 0.08;
+      });
+    }
+
+    function drawLine(fromX, fromY, toX, toY, alpha) {
+      context.globalAlpha = alpha;
+      context.beginPath();
+      context.moveTo(fromX, fromY);
+      context.lineTo(toX, toY);
+      context.stroke();
+    }
+
+    function draw() {
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = color;
+      context.strokeStyle = color;
+      context.lineWidth = 1;
+
+      const points = nodes.map((node) => ({ x: node.x + node.offsetX, y: node.y + node.offsetY }));
+
+      points.forEach((point, index) => {
+        for (let other = index + 1; other < points.length; other += 1) {
+          const target = points[other];
+          const distance = Math.hypot(point.x - target.x, point.y - target.y);
+          if (distance < LINK_DISTANCE) {
+            drawLine(point.x, point.y, target.x, target.y, (1 - distance / LINK_DISTANCE) * 0.18);
+          }
+        }
+        if (pointer) {
+          const distance = Math.hypot(point.x - pointer.x, point.y - pointer.y);
+          if (distance < POINTER_RADIUS) {
+            drawLine(point.x, point.y, pointer.x, pointer.y, (1 - distance / POINTER_RADIUS) * 0.28);
+          }
+        }
+        context.globalAlpha = 0.5;
+        context.beginPath();
+        context.arc(point.x, point.y, 1.6, 0, Math.PI * 2);
+        context.fill();
+      });
+      context.globalAlpha = 1;
+    }
+
+    // If the device can't keep up, halve the graph. If that doesn't help, stop.
+    function checkPerformance(gap) {
+      sampleCount += 1;
+      sampleTotal += gap;
+      if (sampleCount < SAMPLE_FRAMES) return;
+
+      const average = sampleTotal / sampleCount;
+      sampleCount = 0;
+      sampleTotal = 0;
+      if (average <= SLOW_FRAME_MS) return;
+
+      if (density === 1) {
+        density = 0.5;
+        seed();
+      } else {
+        gaveUp = true;
+        sync();
+      }
+    }
+
+    function loop(time) {
+      frameId = window.requestAnimationFrame(loop);
+      const gap = time - lastFrame;
+      if (gap < FRAME_MS) return;
+      lastFrame = time;
+      update();
+      draw();
+      checkPerformance(gap);
+    }
+
+    function stop() {
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
+      frameId = null;
+    }
+
+    function start() {
+      if (frameId !== null) return;
+      lastFrame = window.performance.now();
+      sampleCount = 0;
+      sampleTotal = 0;
+      frameId = window.requestAnimationFrame(loop);
+    }
+
+    function sync() {
+      const allowed = !gaveUp && !isLowPower();
+      canvas.hidden = !allowed;
+      if (!allowed) {
+        stop();
+        return;
+      }
+      if (motion.matches) {
+        // One still frame, with no movement or mouse reaction.
+        stop();
+        pointer = null;
+        draw();
+      } else if (visible) {
+        start();
+      } else {
+        stop();
+      }
+    }
+
+    function resize() {
+      const bounds = hero.getBoundingClientRect();
+      const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+      width = bounds.width;
+      height = bounds.height;
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
+      context.setTransform(scale, 0, 0, scale, 0, 0);
+      seed();
+      sync();
+    }
+
+    function readColor() {
+      color = window.getComputedStyle(root).getPropertyValue('--accent').trim();
+      sync();
+    }
+
+    hero.addEventListener('pointermove', (event) => {
+      if (event.pointerType !== 'mouse' || motion.matches) return;
+      const bounds = hero.getBoundingClientRect();
+      pointer = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+    }, { passive: true });
+    hero.addEventListener('pointerleave', () => {
+      pointer = null;
+    });
+
+    new ResizeObserver(resize).observe(hero);
+    new MutationObserver(readColor).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    motion.addEventListener('change', sync);
+    smallOrTouch.addEventListener('change', sync);
+    watchHeroVisibility((isVisible) => {
+      visible = isVisible;
+      sync();
+    });
+
+    readColor();
+    resize();
+  }
 
   // Decrypts each line of the name, one character at a time. Math.random is fine
   // here because this is only decoration. The name itself never changes, and
@@ -454,6 +743,23 @@
       byId('challenge').scrollIntoView({ behavior: scrollBehavior() });
     }
 
+    // Hidden on purpose: left out of "help" and of Tab completion.
+    function printHireReply() {
+      const linkedIn = document.querySelector('[data-contact-link][data-label="LinkedIn"]');
+      print('[sudo] access request received.', 'term-muted');
+      print('Requester: guest. Request: hire one cybersecurity professional.');
+      print('Least privilege check: passed. You only asked for one.');
+      print('Final approval needs a human, so this one can\'t be automated.', 'term-accent');
+      addLine(h('p', { className: 'term-line' }, [
+        'Complete the request here: ',
+        h('a', {
+          className: 'term-link',
+          text: linkedIn.getAttribute('href'),
+          attrs: { href: linkedIn.getAttribute('href'), target: '_blank', rel: 'noopener noreferrer' },
+        }),
+      ]));
+    }
+
     function runCommand(rawInput) {
       finishBoot();
       const raw = rawInput.trim();
@@ -464,7 +770,13 @@
       if (history.length > MAX_HISTORY) history.shift();
       historyIndex = history.length;
 
-      const name = raw.toLowerCase().split(/\s+/)[0];
+      const words = raw.toLowerCase().split(/\s+/);
+      if (words.join(' ') === 'sudo hire aniketh') {
+        printHireReply();
+        return;
+      }
+
+      const name = words[0];
       const command = COMMANDS.get(name);
 
       if (command) {
@@ -1824,6 +2136,8 @@
     initMobileMenu();
     initRiskMatrix();
     initNameEffect();
+    initHeadlineTyping();
+    initHeroNetwork();
     initScrollReveal();
     initActiveNavLink();
     initScrollProgress();
