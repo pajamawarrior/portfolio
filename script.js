@@ -138,10 +138,72 @@
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && links.classList.contains('is-open')) {
+      // An open dropdown takes the first Escape; the menu closes on the next.
+      const dropdownOpen = links.querySelector('.nav-dropdown.is-open');
+      if (event.key === 'Escape' && links.classList.contains('is-open') && !dropdownOpen) {
         setOpen(false);
         toggle.focus();
       }
+    });
+  }
+
+  // The "Labs" dropdown. It is a disclosure: a button that shows or hides a list
+  // of ordinary links, so Tab, Enter and Space work with no special handling.
+  function initNavDropdown() {
+    const dropdown = document.querySelector('[data-nav-dropdown]');
+    if (!dropdown) return;
+
+    const toggle = dropdown.querySelector('.nav-dropdown-toggle');
+    const items = [...dropdown.querySelectorAll('.nav-dropdown-menu a')];
+
+    function setOpen(open) {
+      dropdown.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    }
+
+    toggle.addEventListener('click', () => setOpen(!dropdown.classList.contains('is-open')));
+
+    toggle.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        setOpen(true);
+        items[0].focus();
+      }
+    });
+
+    // Arrow keys, Home and End move between the links once the list is open.
+    dropdown.querySelector('.nav-dropdown-menu').addEventListener('keydown', (event) => {
+      const index = items.indexOf(document.activeElement);
+      let next = -1;
+      if (event.key === 'ArrowDown') next = (index + 1) % items.length;
+      if (event.key === 'ArrowUp') next = (index - 1 + items.length) % items.length;
+      if (event.key === 'Home') next = 0;
+      if (event.key === 'End') next = items.length - 1;
+      if (next === -1) return;
+      event.preventDefault();
+      items[next].focus();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !dropdown.classList.contains('is-open')) return;
+      // Only pull focus back if it was inside, so it never jumps from elsewhere.
+      const hadFocus = dropdown.contains(document.activeElement);
+      setOpen(false);
+      if (hadFocus) toggle.focus();
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!dropdown.contains(event.target)) setOpen(false);
+    });
+
+    // Tabbing out of the dropdown closes it.
+    dropdown.addEventListener('focusout', (event) => {
+      if (event.relatedTarget && !dropdown.contains(event.relatedTarget)) setOpen(false);
+    });
+
+    // Choosing a link closes it.
+    dropdown.addEventListener('click', (event) => {
+      if (event.target.closest('a')) setOpen(false);
     });
   }
 
@@ -171,6 +233,7 @@
     if (!('IntersectionObserver' in window)) return;
 
     const links = [...document.querySelectorAll('#nav-links a')];
+    const dropdown = document.querySelector('[data-nav-dropdown]');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         const link = links.find((item) => item.getAttribute('href') === `#${entry.target.id}`);
@@ -181,6 +244,8 @@
           link.removeAttribute('aria-current');
         }
       });
+      // Light up "Labs" while one of the lab sections is in view.
+      if (dropdown) dropdown.classList.toggle('is-current', !!dropdown.querySelector('[aria-current]'));
     }, { rootMargin: '-45% 0px -50% 0px' });
 
     links.forEach((link) => {
@@ -2450,6 +2515,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
     initMobileMenu();
+    initNavDropdown();
     initRiskMatrix();
     initNameEffect();
     initHeadlineTyping();

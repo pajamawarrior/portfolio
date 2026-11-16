@@ -3,3 +3,6 @@ node_modules/
 
 # The folder the pipeline assembles for deployment
 _site/
+
+# macOS folder metadata
+.DS_Store

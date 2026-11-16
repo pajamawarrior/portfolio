@@ -46,15 +46,20 @@
 
       <ul class="nav-links" id="nav-links">
         <li><a href="#about">About</a></li>
-        <li><a href="#currently">Currently</a></li>
         <li><a href="#skills">Skills</a></li>
         <li><a href="#experience">Experience</a></li>
         <li><a href="#projects">Projects</a></li>
-        <li><a href="#challenge">Challenge</a></li>
-        <li><a href="#threat-model">Threat Model</a></li>
-        <li><a href="#triage">Triage</a></li>
-        <li><a href="#incident">Incident</a></li>
-        <li><a href="#homelab">Homelab</a></li>
+        <li><a href="#case-study">Case Study</a></li>
+        <li class="nav-dropdown" data-nav-dropdown>
+          <button class="nav-dropdown-toggle" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="labs-menu">Labs</button>
+          <ul class="nav-dropdown-menu" id="labs-menu">
+            <li><a href="#challenge">Challenge</a></li>
+            <li><a href="#threat-model">Threat Model</a></li>
+            <li><a href="#triage">Triage</a></li>
+            <li><a href="#incident">Incident</a></li>
+            <li><a href="#homelab">Homelab</a></li>
+          </ul>
+        </li>
         <li><a href="#contact">Contact</a></li>
       </ul>
 
@@ -409,11 +414,58 @@
       </div>
     </section>
 
+    <!-- ===== Case study: ING DORA readiness review ===== -->
+    <section class="section" id="case-study" aria-labelledby="case-study-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="section-number" aria-hidden="true">06</span>
+          <h2 id="case-study-title">Case Study</h2>
+        </header>
+
+        <article class="glass case-study reveal">
+          <h3>ING Group &ndash; DORA Readiness Review (2026 update to my MSc analysis)</h3>
+          <p class="case-summary">An outside-in review of how far ING Group's 2025 public disclosures show alignment with the EU Digital Operational Resilience Act (DORA). It updates the DORA compliance risk analysis I did for my MSc in Cybersecurity Risk Management at NUI Galway, redone from scratch on 2025 data.</p>
+
+          <div class="case-grid">
+            <div class="case-text">
+              <h4>What I did</h4>
+              <ol>
+                <li>Built a requirements checklist of 29 DORA requirements across the five pillars.</li>
+                <li>Mapped evidence from ING's 2025 Annual Report, 20-F and Pillar III Report, with page references.</li>
+                <li>Rated each requirement as Clear evidence, Partial or Disclosure gap.</li>
+                <li>Built a risk register of eight risks, scored on likelihood and impact.</li>
+                <li>Plotted a risk heatmap in R (ggplot2).</li>
+                <li>Wrote a prioritised recommendations roadmap.</li>
+              </ol>
+
+              <h4>Key findings</h4>
+              <ul>
+                <li>ING names DORA directly and links its cyber and third-party controls to it.</li>
+                <li>Two DDoS incidents reported to supervisors in 2025, one through a third-party payment service, match risks flagged in my original MSc analysis.</li>
+                <li>The main disclosure gaps are threat-led penetration testing, the register of information, exit strategies for critical ICT providers and client notification of incidents.</li>
+                <li>Three risks scored Critical: DDoS on customer channels, critical third-party failure and ransomware recovery.</li>
+              </ul>
+            </div>
+
+            <figure class="case-figure">
+              <img src="assets/ing_dora_heatmap.png" width="2400" height="2550" loading="lazy" alt="ING DORA risk heatmap">
+            </figure>
+          </div>
+
+          <p class="case-tools"><strong>Tools:</strong> Public filings analysis, DORA (Regulation (EU) 2022/2554), R and ggplot2.</p>
+
+          <a class="button button-primary" href="https://github.com/pajamawarrior/ING-DORA-review" target="_blank" rel="noopener noreferrer">Read the full review on GitHub<span class="sr-only"> (opens in a new tab)</span></a>
+
+          <p class="case-disclaimer">Based only on public disclosures. Disclosure gaps mean information was not found in the sources reviewed; they do not imply non-compliance. Not affiliated with or endorsed by ING.</p>
+        </article>
+      </div>
+    </section>
+
     <!-- ===== Security challenge: three tabbed mini-games ===== -->
     <section class="section" id="challenge" aria-labelledby="challenge-title">
       <div class="container">
         <header class="section-head reveal">
-          <span class="section-number" aria-hidden="true">06</span>
+          <span class="section-number" aria-hidden="true">07</span>
           <h2 id="challenge-title">Security Challenge</h2>
         </header>
         <p class="section-intro reveal">Your turn. Spot what's wrong with a login page, catch the phishing emails, and crack a bad password. Every company, person and web address in here is made up, so nobody gets hurt.</p>
@@ -559,7 +611,7 @@
     <section class="section" id="threat-model" aria-labelledby="threat-model-title">
       <div class="container">
         <header class="section-head reveal">
-          <span class="section-number" aria-hidden="true">07</span>
+          <span class="section-number" aria-hidden="true">08</span>
           <h2 id="threat-model-title">Threat Model</h2>
         </header>
         <p class="section-intro reveal">I ran STRIDE over this site. Pick a part of it to see what could go wrong, how I rate that risk now the controls are in place, and where each control lives in the <a href="https://github.com/pajamawarrior/portfolio" target="_blank" rel="noopener noreferrer">code<span class="sr-only"> (opens in a new tab)</span></a>. Where something isn't covered, it says so.</p>
@@ -648,7 +700,7 @@
     <section class="section" id="triage" aria-labelledby="triage-title">
       <div class="container">
         <header class="section-head reveal">
-          <span class="section-number" aria-hidden="true">08</span>
+          <span class="section-number" aria-hidden="true">09</span>
           <h2 id="triage-title">SOC Alert Triage</h2>
         </header>
         <p class="section-intro reveal">Security analysts get hundreds of alerts a day, and many turn out to be harmless. Your job is to sort the real attacks (true positives) from the false alarms (false positives). All six alerts below are made up.</p>
@@ -686,7 +738,7 @@
     <section class="section" id="incident" aria-labelledby="incident-title">
       <div class="container">
         <header class="section-head reveal">
-          <span class="section-number" aria-hidden="true">09</span>
+          <span class="section-number" aria-hidden="true">10</span>
           <h2 id="incident-title">Incident Response</h2>
         </header>
         <p class="section-intro reveal">A walkthrough of a made-up phishing incident, following the six stages of a standard incident response process. Select a stage to see what an analyst does there.</p>
@@ -704,7 +756,7 @@
     <section class="section" id="homelab" aria-labelledby="homelab-title">
       <div class="container">
         <header class="section-head reveal">
-          <span class="section-number" aria-hidden="true">10</span>
+          <span class="section-number" aria-hidden="true">11</span>
           <h2 id="homelab-title">Homelab</h2>
         </header>
         <div class="glass panel homelab reveal">
@@ -719,7 +771,7 @@
     <section class="section" id="contact" aria-labelledby="contact-title">
       <div class="container">
         <header class="section-head reveal">
-          <span class="section-number" aria-hidden="true">11</span>
+          <span class="section-number" aria-hidden="true">12</span>
           <h2 id="contact-title">Say hello</h2>
         </header>
         <p class="section-intro reveal">LinkedIn is the best way to reach me.</p>

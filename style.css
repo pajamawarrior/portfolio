@@ -16,7 +16,7 @@
     10. Game 2: Phishing Spotter
     11. Game 3: Password Puzzle
     12. Threat model and risk matrix game
-    13. SOC triage, incident response and homelab
+    13. Case study, SOC triage, incident response and homelab
     14. Contact and risk register
     15. Footer
     16. Scroll animations and motion preferences
@@ -261,9 +261,54 @@ body::after {
   text-decoration: none;
   transition: color 0.2s;
 }
+.nav-links a, .nav-dropdown-toggle { white-space: nowrap; }
 .nav-links a:hover { color: var(--text); }
 .nav-links a[aria-current="true"] { color: var(--accent); }
 .nav-links a[aria-current="true"]::before { content: "> "; }
+
+/* "Labs" dropdown: a button that discloses a list of links. */
+.nav-dropdown { position: relative; }
+.nav-dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nav-dropdown-toggle::after {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: translateY(-0.1rem) rotate(45deg);
+  transition: transform 0.2s;
+}
+.nav-dropdown-toggle:hover, .nav-dropdown.is-open .nav-dropdown-toggle { color: var(--text); }
+.nav-dropdown.is-current .nav-dropdown-toggle { color: var(--accent); }
+.nav-dropdown.is-open .nav-dropdown-toggle::after { transform: translateY(0.1rem) rotate(225deg); }
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 60;
+  min-width: 11rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  box-shadow: var(--glow);
+}
+.nav-dropdown-menu a { padding: 0.55rem 0.75rem; }
+/* The list is only hidden when JavaScript is there to open it. */
+.js .nav-dropdown:not(.is-open) .nav-dropdown-menu { display: none; }
 
 .nav-actions { display: flex; gap: 0.5rem; }
 
@@ -297,7 +342,7 @@ body::after {
 
 .nav-toggle { display: none; }
 
-@media (max-width: 1280px) {
+@media (max-width: 1080px) {
   .nav-toggle { display: grid; }
   .nav { position: relative; flex-wrap: wrap; }
   .nav-links {
@@ -307,6 +352,17 @@ body::after {
     padding-bottom: 0.75rem;
   }
   .nav-links a { padding: 0.7rem 0.4rem; font-size: 0.95rem; }
+  /* In the phone menu the dropdown opens in place, indented, instead of floating. */
+  .nav-dropdown-toggle { width: 100%; justify-content: space-between; padding: 0.7rem 0.4rem; font-size: 0.95rem; }
+  .nav-dropdown-menu {
+    position: static;
+    min-width: 0;
+    padding: 0 0 0.25rem 1rem;
+    border: 0;
+    border-left: 1px solid var(--border);
+    background: none;
+    box-shadow: none;
+  }
   /* The menu only collapses when JavaScript is there to open it again. */
   .js .nav-links:not(.is-open) { display: none; }
 }
@@ -1504,8 +1560,43 @@ h1 {
   .risk-cell { font-size: 0.66rem; }
 }
 
-/* 13. SOC triage, incident response and homelab
+/* 13. Case study, SOC triage, incident response and homelab
    ========================================================================== */
+.case-study { padding: clamp(1.25rem, 3vw, 2.25rem); }
+.case-study h3 { font-size: clamp(1.3rem, 3vw, 1.75rem); }
+.case-study h4 { margin: 1.5rem 0 0.6rem; font-family: var(--font-display); font-size: 1.1rem; }
+.case-summary { margin-top: 0.75rem; max-width: 52rem; color: var(--muted); }
+.case-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1.5rem 2.5rem;
+  align-items: start;
+}
+.case-text h4:first-child { margin-top: 1.25rem; }
+.case-text ol, .case-text ul { padding-left: 1.2rem; }
+.case-text ul { list-style: square; }
+.case-text li + li { margin-top: 0.4rem; }
+.case-text li::marker { color: var(--accent); }
+.case-figure {
+  margin-top: 1.25rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+}
+.case-figure img { display: block; width: 100%; height: auto; border-radius: 2px; }
+.case-tools { margin: 1.5rem 0 1.1rem; color: var(--muted); }
+.case-tools strong { color: var(--text); }
+.case-disclaimer { max-width: 52rem; margin-top: 1.25rem; color: var(--muted); font-size: 0.8rem; }
+
+@media (max-width: 900px) {
+  .case-grid { grid-template-columns: minmax(0, 1fr); }
+  .case-figure { max-width: 32rem; }
+}
+@media (max-width: 480px) {
+  .case-study .button { width: 100%; text-align: center; }
+}
+
 .triage { padding: clamp(1.25rem, 3vw, 2rem); }
 .triage-meta {
   display: flex;
