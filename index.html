@@ -52,6 +52,9 @@
         <li><a href="#projects">Projects</a></li>
         <li><a href="#challenge">Challenge</a></li>
         <li><a href="#threat-model">Threat Model</a></li>
+        <li><a href="#triage">Triage</a></li>
+        <li><a href="#incident">Incident</a></li>
+        <li><a href="#homelab">Homelab</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
 
@@ -641,11 +644,82 @@
       </div>
     </section>
 
+    <!-- ===== SOC alert triage game ===== -->
+    <section class="section" id="triage" aria-labelledby="triage-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="section-number" aria-hidden="true">08</span>
+          <h2 id="triage-title">SOC Alert Triage</h2>
+        </header>
+        <p class="section-intro reveal">Security analysts get hundreds of alerts a day, and many turn out to be harmless. Your job is to sort the real attacks (true positives) from the false alarms (false positives). All six alerts below are made up.</p>
+
+        <noscript><p class="glass panel">The triage game needs JavaScript. The rest of the site works without it.</p></noscript>
+
+        <div class="glass triage reveal" id="triage-game">
+          <div id="triage-round">
+            <p class="triage-meta"><span id="triage-progress"></span> <span id="triage-score"></span></p>
+            <div class="triage-alert" id="triage-alert">
+              <h3 class="triage-title" id="triage-alert-title" tabindex="-1"></h3>
+              <dl class="triage-fields" id="triage-fields"></dl>
+            </div>
+            <div class="game-actions" id="triage-actions">
+              <button class="button" id="triage-tp" type="button">True positive: a real threat</button>
+              <button class="button" id="triage-fp" type="button">False positive: a false alarm</button>
+            </div>
+            <div class="triage-feedback" id="triage-feedback" role="status" tabindex="-1"></div>
+            <div class="game-actions">
+              <button class="button button-primary" id="triage-next" type="button" hidden>Next alert</button>
+            </div>
+          </div>
+          <div id="triage-result" hidden>
+            <h3 class="risk-result-title" id="triage-result-title" tabindex="-1"></h3>
+            <p id="triage-result-text"></p>
+            <div class="game-actions">
+              <button class="button button-primary" id="triage-restart" type="button">Play again</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Incident response timeline ===== -->
+    <section class="section" id="incident" aria-labelledby="incident-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="section-number" aria-hidden="true">09</span>
+          <h2 id="incident-title">Incident Response</h2>
+        </header>
+        <p class="section-intro reveal">A walkthrough of a made-up phishing incident, following the six stages of a standard incident response process. Select a stage to see what an analyst does there.</p>
+
+        <noscript><p class="glass panel">The incident timeline needs JavaScript. The rest of the site works without it.</p></noscript>
+
+        <div class="ir reveal">
+          <ol class="ir-steps" id="ir-steps" aria-label="Incident response stages"></ol>
+          <div class="glass ir-detail" id="ir-detail" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Homelab placeholder ===== -->
+    <section class="section" id="homelab" aria-labelledby="homelab-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="section-number" aria-hidden="true">10</span>
+          <h2 id="homelab-title">Homelab</h2>
+        </header>
+        <div class="glass panel homelab reveal">
+          <p class="homelab-status"><span class="homelab-dot" aria-hidden="true"></span>Coming soon</p>
+          <h3>Wazuh SIEM home lab</h3>
+          <p>A write-up on setting up Wazuh, an open-source SIEM, in a home lab is planned. It isn't written yet, so there is nothing to show here for now.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== Contact ===== -->
     <section class="section" id="contact" aria-labelledby="contact-title">
       <div class="container">
         <header class="section-head reveal">
-          <span class="section-number" aria-hidden="true">08</span>
+          <span class="section-number" aria-hidden="true">11</span>
           <h2 id="contact-title">Say hello</h2>
         </header>
         <p class="section-intro reveal">LinkedIn is the best way to reach me.</p>

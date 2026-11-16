@@ -12,6 +12,8 @@
      9. Game 3: Password Puzzle
     10. Threat model
     11. Risk matrix game
+    12. SOC alert triage
+    13. Incident response timeline
 
    Security rule for this file: text only ever reaches the page through
    textContent or the h() helper below, which uses it too. Nothing in here
@@ -2182,6 +2184,267 @@
     reset();
   }
 
+  /* 12. SOC alert triage
+     ======================================================================== */
+  // Every alert here is invented. Details are plain-English so non-specialists can play.
+  const ALERTS = [
+    {
+      title: 'Impossible-travel login',
+      fields: [
+        ['Account', 'a.martin@example.test'],
+        ['Login 1', '09:02 from Lisbon, Portugal'],
+        ['Login 2', '09:19 from Lagos, Nigeria'],
+        ['Detail', 'New device, no multi-factor prompt shown'],
+      ],
+      isThreat: true,
+      verdict: 'No one can travel between two countries in 17 minutes. Two logins from far-apart places, a new device and no second-factor check suggest the password was stolen. An analyst would reset the password, end the sessions and check what the account did.',
+    },
+    {
+      title: 'Suspicious PowerShell command',
+      fields: [
+        ['Host', 'FIN-LAPTOP-07'],
+        ['Parent app', 'Microsoft Word'],
+        ['Command', 'powershell -enc JABzAD0ATgBlAHcA...'],
+        ['Detail', 'Tried to download a file from an unknown website'],
+      ],
+      isThreat: true,
+      verdict: 'Word has no reason to start PowerShell. Hiding the command in an encoded string and downloading from an unknown site is a classic way for a malicious document to install malware. The laptop should be isolated for investigation.',
+    },
+    {
+      title: 'Phishing link clicked',
+      fields: [
+        ['User', 'j.okafor@example.test'],
+        ['Email subject', 'Urgent: confirm your payroll details'],
+        ['Link', 'payr0ll-portal.example.invalid/login'],
+        ['Detail', 'Site was newly registered yesterday; the user then typed in a password'],
+      ],
+      isThreat: true,
+      verdict: 'The address swaps the letter "o" for a zero, the site is brand new, and the user entered a password on it. Treat the password as stolen: reset it, block the site and look for the same email in other inboxes.',
+    },
+    {
+      title: 'Port scan detected',
+      fields: [
+        ['Source', '10.0.4.25 (internal)'],
+        ['Owner', 'Security team vulnerability scanner'],
+        ['Time', 'Tuesday 02:00, in the approved scan window'],
+        ['Detail', 'Probed 1,200 servers across common ports'],
+      ],
+      isThreat: false,
+      verdict: 'A port scan can be the first step of an attack, but this one comes from the security team\'s own scanner, at its scheduled time. It matches the approved change record, so it is a false alarm. An analyst would close it and note why.',
+    },
+    {
+      title: 'Multiple failed logins',
+      fields: [
+        ['Account', 'p.nguyen@example.test'],
+        ['Attempts', '5 failed logins in 3 minutes, then a success'],
+        ['Source', 'The usual office network, the usual laptop'],
+        ['Detail', 'Same day as a company-wide password change'],
+      ],
+      isThreat: false,
+      verdict: 'Several failures followed by a success can mean password guessing. But here it is the usual device and location, on the day everyone had to change their password, so this looks like someone mistyping a new password. Low risk, worth a quick check with the user.',
+    },
+    {
+      title: 'Large file upload to a personal cloud drive',
+      fields: [
+        ['User', 'r.silva@example.test'],
+        ['Upload', '4.2 GB to an unapproved file-sharing site'],
+        ['Time', '23:40, a Saturday'],
+        ['Detail', 'User handed in notice last week; files came from the customer database share'],
+      ],
+      isThreat: true,
+      verdict: 'A big upload of customer data to a personal service, out of hours, from someone who is leaving, looks like data theft. An analyst would escalate it straight away to management and HR and preserve the evidence.',
+    },
+  ];
+
+  function initTriageGame() {
+    const roundView = byId('triage-round');
+    const resultView = byId('triage-result');
+    const title = byId('triage-alert-title');
+    const fields = byId('triage-fields');
+    const feedback = byId('triage-feedback');
+    const nextButton = byId('triage-next');
+    const buttons = { true: byId('triage-tp'), false: byId('triage-fp') };
+    if (!roundView || !title) return;
+
+    let order = [];
+    let position = 0;
+    let score = 0;
+    let answered = false;
+
+    function showAlert() {
+      const current = order[position];
+      answered = false;
+      byId('triage-progress').textContent = `Alert ${position + 1} of ${order.length}`;
+      byId('triage-score').textContent = `Score ${score}`;
+      title.textContent = current.title;
+      fields.replaceChildren(...current.fields.flatMap(([name, value]) => [
+        h('dt', { text: name }),
+        h('dd', { text: value }),
+      ]));
+      Object.values(buttons).forEach((button) => {
+        button.disabled = false;
+        button.removeAttribute('aria-pressed');
+      });
+      feedback.replaceChildren();
+      nextButton.hidden = true;
+    }
+
+    function answer(saidThreat) {
+      if (answered) return;
+      answered = true;
+      const current = order[position];
+      const correct = saidThreat === current.isThreat;
+      if (correct) score += 1;
+      byId('triage-score').textContent = `Score ${score}`;
+
+      buttons[saidThreat].setAttribute('aria-pressed', 'true');
+      Object.values(buttons).forEach((button) => { button.disabled = true; });
+
+      const truth = current.isThreat ? 'a true positive (a real threat)' : 'a false positive (a false alarm)';
+      feedback.replaceChildren(
+        h('p', {
+          className: `triage-verdict ${correct ? 'is-right' : 'is-wrong'}`,
+          text: `${correct ? 'Correct' : 'Not quite'}: this is ${truth}.`,
+        }),
+        h('p', { text: current.verdict }),
+      );
+      nextButton.textContent = position === order.length - 1 ? 'See your result' : 'Next alert';
+      nextButton.hidden = false;
+      feedback.focus();
+    }
+
+    function finish() {
+      roundView.hidden = true;
+      resultView.hidden = false;
+      const resultTitle = byId('triage-result-title');
+      resultTitle.textContent = `You triaged ${score} of ${order.length} alerts correctly`;
+      byId('triage-result-text').textContent = score === order.length
+        ? 'A clean sweep. Real analysts also weigh context like time, user and device, which is what these cases tested.'
+        : 'Context is everything in triage: who, where, when and whether it matches something approved. Have another go.';
+      resultTitle.focus();
+    }
+
+    function start() {
+      order = shuffle(ALERTS);
+      position = 0;
+      score = 0;
+      resultView.hidden = true;
+      roundView.hidden = false;
+      showAlert();
+    }
+
+    buttons.true.addEventListener('click', () => answer(true));
+    buttons.false.addEventListener('click', () => answer(false));
+    nextButton.addEventListener('click', () => {
+      if (position === order.length - 1) {
+        finish();
+        return;
+      }
+      position += 1;
+      showAlert();
+      title.focus();
+    });
+    byId('triage-restart').addEventListener('click', () => {
+      start();
+      title.focus();
+    });
+
+    start();
+  }
+
+  /* 13. Incident response timeline
+     ======================================================================== */
+  // A made-up phishing incident, told through the six stages of incident response.
+  const IR_STAGES = [
+    {
+      name: 'Detection',
+      summary: 'Scenario: an email filter flags a message, and then an employee reports clicking its link.',
+      steps: [
+        'Receive the alert and the user\'s report, and open an incident ticket with the time and source.',
+        'Check whether this is real or a false alarm before raising the alarm for everyone.',
+        'Give it an initial severity so the right people are told.',
+      ],
+    },
+    {
+      name: 'Analysis',
+      summary: 'Work out what happened and how far it has spread.',
+      steps: [
+        'Pull the original email and read its headers to see where it really came from.',
+        'Look up the link and any attachment in a safe sandbox, never on a normal work machine.',
+        'Search mail logs to find everyone else who got the same message, and check sign-in logs to see who clicked and who entered a password.',
+        'Keep notes with timestamps as you go. They become the evidence later.',
+      ],
+    },
+    {
+      name: 'Containment',
+      summary: 'Stop it spreading, without destroying evidence.',
+      steps: [
+        'Block the sender and the fake website at the email filter and web proxy.',
+        'Remove the message from every inbox that received it.',
+        'Reset the password and end the sessions of anyone who entered credentials.',
+        'Isolate any device that opened an attachment from the network.',
+      ],
+    },
+    {
+      name: 'Eradication',
+      summary: 'Remove whatever the attacker left behind.',
+      steps: [
+        'Delete malicious files and any persistence the attacker set up, such as new mailbox rules or app permissions.',
+        'Check that no other accounts or devices show the same signs.',
+        'Confirm that multi-factor authentication is on for affected accounts.',
+      ],
+    },
+    {
+      name: 'Recovery',
+      summary: 'Return to normal, carefully.',
+      steps: [
+        'Bring isolated devices back once they are clean, or rebuild them if there is any doubt.',
+        'Re-enable accounts with new credentials.',
+        'Watch the affected accounts and devices more closely for a few weeks in case the attacker returns.',
+      ],
+    },
+    {
+      name: 'Lessons Learned',
+      summary: 'Review what happened so the next incident goes better.',
+      steps: [
+        'Hold a blameless review: what worked, what was slow, what was missed.',
+        'Write the incident report with the timeline and the decisions taken.',
+        'Turn findings into actions, such as better detection rules, user training or tighter email controls.',
+      ],
+    },
+  ];
+
+  function initIncidentTimeline() {
+    const list = byId('ir-steps');
+    const detail = byId('ir-detail');
+    if (!list || !detail) return;
+
+    const buttons = IR_STAGES.map((stage, index) => h('button', {
+      className: 'ir-step',
+      attrs: { type: 'button', 'aria-pressed': 'false' },
+    }, [
+      h('span', { className: 'ir-step-num', text: `Step ${index + 1}` }),
+      h('span', { text: stage.name }),
+    ]));
+
+    buttons.forEach((button, index) => {
+      button.addEventListener('click', () => show(index));
+      list.append(h('li', {}, [button]));
+    });
+
+    function show(index) {
+      const stage = IR_STAGES[index];
+      buttons.forEach((button, i) => button.setAttribute('aria-pressed', String(i === index)));
+      detail.replaceChildren(
+        h('h3', { text: `${index + 1}. ${stage.name}` }),
+        h('p', { className: 'ir-summary', text: stage.summary }),
+        h('ul', {}, stage.steps.map((text) => h('li', { text }))),
+      );
+    }
+
+    show(0);
+  }
+
   /* Start everything once the page has loaded
      ======================================================================== */
   document.addEventListener('DOMContentLoaded', () => {
@@ -2201,5 +2464,7 @@
     initPasswordPuzzle();
     initThreatModel();
     initRiskGame();
+    initTriageGame();
+    initIncidentTimeline();
   });
 }());
